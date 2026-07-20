@@ -280,7 +280,7 @@ async function main() {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     executionMode: config.mock ? "mock" : "live",
-    model: process.env.OPENAI_MODEL || "gpt-5.6",
+    model: process.env.OPENAI_MODEL || "gpt-5.6-terra",
     baseUrl: server.baseUrl,
     runtimeDataDirectory,
     completeSet,

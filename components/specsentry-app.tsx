@@ -7,7 +7,7 @@ import type { ActionRecord, DemoMode, FindingReviewContent, NewTestInput, TestPl
 
 type Phase = "input" | "plan" | "running" | "report";
 type LiveEvent = { type: string; payload: unknown; createdAt: string };
-type IssuePreview = { title: string; body: string; repository: string; previewToken: string };
+type IssuePreview = { title: string; body: string; repository: string; previewToken: string; exportDisabled: boolean };
 
 const emptyInput: NewTestInput = {
   stagingUrl: "",
@@ -383,8 +383,14 @@ function FindingReviewPanel({ report, refresh }: { report: RunReport; refresh: (
               <div><strong className="text-sm">Repository</strong><pre className="mt-2 overflow-auto border border-[var(--line)] bg-white p-4 text-xs">{preview.repository}</pre></div>
               <div><strong className="text-sm">Exact title</strong><pre className="mt-2 overflow-auto border border-[var(--line)] bg-white p-4 text-xs">{preview.title}</pre></div>
               <div><strong className="text-sm">Exact Markdown body</strong><pre className="mt-2 max-h-[520px] overflow-auto whitespace-pre-wrap border border-[var(--line)] bg-white p-4 text-xs leading-5">{preview.body}</pre></div>
-              <label className="flex items-start gap-3 border border-[var(--line)] p-4 text-sm font-bold"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} className="mt-1" /><span>I reviewed this exact title and Markdown body. Create one issue in {preview.repository}.</span></label>
-              <button type="button" disabled={busy || !confirmed} onClick={exportIssue} className="bg-[var(--ink)] px-5 py-3 text-sm font-black uppercase tracking-wider text-white disabled:opacity-45">Confirm and create one GitHub issue</button>
+              {preview.exportDisabled ? (
+                <p className="border border-[var(--line)] bg-[#eeece5] p-4 text-sm font-bold">GitHub issue creation is disabled in public demo mode. This exact preview is read-only.</p>
+              ) : (
+                <>
+                  <label className="flex items-start gap-3 border border-[var(--line)] p-4 text-sm font-bold"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} className="mt-1" /><span>I reviewed this exact title and Markdown body. Create one issue in {preview.repository}.</span></label>
+                  <button type="button" disabled={busy || !confirmed} onClick={exportIssue} className="bg-[var(--ink)] px-5 py-3 text-sm font-black uppercase tracking-wider text-white disabled:opacity-45">Confirm and create one GitHub issue</button>
+                </>
+              )}
             </div>
           ) : null}
         </section>

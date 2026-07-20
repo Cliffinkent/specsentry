@@ -153,7 +153,7 @@ async function main() {
   const directory = path.join(process.cwd(), "data");
   await fs.mkdir(directory, { recursive: true, mode: 0o700 });
   const resultsPath = path.join(directory, `live-results-${new Date().toISOString().replace(/[:.]/g, "-")}.json`);
-  await fs.writeFile(resultsPath, `${JSON.stringify({ model: process.env.OPENAI_MODEL || "gpt-5.6", baseUrl, results }, null, 2)}\n`, { mode: 0o600 });
+  await fs.writeFile(resultsPath, `${JSON.stringify({ model: process.env.OPENAI_MODEL || "gpt-5.6-terra", baseUrl, results }, null, 2)}\n`, { mode: 0o600 });
   console.log(`LIVE_RESULTS_FILE=${resultsPath}`);
 
   if (!results.every(meetsExpectation)) process.exitCode = 1;

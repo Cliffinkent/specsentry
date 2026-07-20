@@ -120,4 +120,16 @@ describe("GitHub export service", () => {
       expect(message).not.toContain("private upstream response");
     }
   });
+
+  it("blocks issue creation in public demo mode without calling GitHub", async () => {
+    const { repository, id } = approvedRun();
+    const preview = previewGitHubIssue(id, repository);
+    vi.stubEnv("SPECSENTRY_PUBLIC_DEMO", "true");
+    const client: GitHubIssueClient = { findIssueByMarker: vi.fn(), createIssue: vi.fn() };
+    await expect(exportGitHubIssue(id, preview.previewToken, { repository, client })).rejects.toThrow("disabled in public demo mode");
+    expect(client.findIssueByMarker).not.toHaveBeenCalled();
+    expect(client.createIssue).not.toHaveBeenCalled();
+    expect(repository.getRun(id)?.findingReview?.status).toBe("approved");
+    repository.close();
+  });
 });

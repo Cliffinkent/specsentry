@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { GitHubConfigurationError } from "@/lib/github/config";
 import { previewGitHubIssue } from "@/lib/github/export-service";
 import { reviewTransitionSchema } from "@/lib/schemas";
+import { isPublicDemoMode } from "@/lib/security/public-demo";
 import { rateLimitKey, takeRateLimit } from "@/lib/security/rate-limit";
 import { logServerError } from "@/lib/security/redaction";
 import { assertMutationIntent, readJsonBody } from "@/lib/security/request-policy";
@@ -16,7 +17,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     assertMutationIntent(request, "github-preview");
     reviewTransitionSchema.parse(await readJsonBody(request));
     const preview = previewGitHubIssue(id);
-    return NextResponse.json({ preview: { title: preview.title, body: preview.body, repository: preview.repository, previewToken: preview.previewToken } });
+    return NextResponse.json({ preview: { title: preview.title, body: preview.body, repository: preview.repository, previewToken: preview.previewToken, exportDisabled: isPublicDemoMode() } });
   } catch (error) {
     logServerError(`github-preview:${id}`, error);
     if (error instanceof GitHubConfigurationError) return NextResponse.json({ error: "GitHub export is not configured for an allowed repository." }, { status: 503 });

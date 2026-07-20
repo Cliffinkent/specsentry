@@ -18,6 +18,9 @@ const contentSecurityPolicy = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingIncludes: {
+    "/*": ["./node_modules/playwright/**/*", "./node_modules/playwright-core/**/*"],
+  },
   distDir: process.env.SPECSENTRY_NEXT_DIST_DIR || ".next",
   typescript: {
     tsconfigPath: process.env.SPECSENTRY_TSCONFIG_PATH || "tsconfig.json",

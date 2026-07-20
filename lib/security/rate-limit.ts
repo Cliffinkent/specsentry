@@ -1,3 +1,5 @@
+import { isPublicDemoMode } from "@/lib/security/public-demo";
+
 type Bucket = { count: number; resetAt: number };
 
 const buckets = new Map<string, Bucket>();
@@ -22,6 +24,38 @@ export function takeRateLimit(key: string, maximum: number, windowMs: number, no
 export function rateLimitKey(request: Request, route: string) {
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   return `${route}:${forwarded || request.headers.get("x-real-ip") || "local"}`;
+}
+
+function takeConfiguredRequestLimit(
+  request: Request,
+  route: "plans" | "runs",
+  standard: { maximum: number; windowMs: number },
+  publicDemo: { maximum: number; globalMaximum: number; windowMs: number },
+) {
+  if (!isPublicDemoMode()) {
+    return takeRateLimit(rateLimitKey(request, route), standard.maximum, standard.windowMs);
+  }
+  const client = takeRateLimit(rateLimitKey(request, `public-demo:${route}`), publicDemo.maximum, publicDemo.windowMs);
+  if (!client.allowed) return client;
+  return takeRateLimit(`public-demo:${route}:global`, publicDemo.globalMaximum, publicDemo.windowMs);
+}
+
+export function takePlanningRateLimit(request: Request) {
+  return takeConfiguredRequestLimit(
+    request,
+    "plans",
+    { maximum: 10, windowMs: 60_000 },
+    { maximum: 4, globalMaximum: 24, windowMs: 600_000 },
+  );
+}
+
+export function takeRunCreationRateLimit(request: Request) {
+  return takeConfiguredRequestLimit(
+    request,
+    "runs",
+    { maximum: 6, windowMs: 60_000 },
+    { maximum: 2, globalMaximum: 12, windowMs: 600_000 },
+  );
 }
 
 export function resetRateLimitsForTests() {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { GitHubConfigurationError } from "@/lib/github/config";
 import { exportGitHubIssue } from "@/lib/github/export-service";
 import { githubExportRequestSchema } from "@/lib/schemas";
+import { PublicDemoExportDisabledError } from "@/lib/security/public-demo";
 import { rateLimitKey, takeRateLimit } from "@/lib/security/rate-limit";
 import { logServerError } from "@/lib/security/redaction";
 import { assertMutationIntent, readJsonBody } from "@/lib/security/request-policy";
@@ -19,6 +20,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json(result);
   } catch (error) {
     logServerError(`github-export-route:${id}`, error);
+    if (error instanceof PublicDemoExportDisabledError) return NextResponse.json({ error: error.message }, { status: 403 });
     if (error instanceof GitHubConfigurationError) return NextResponse.json({ error: "GitHub export is not configured for an allowed repository." }, { status: 503 });
     const retryable = error instanceof Error && /failed safely/i.test(error.message);
     return NextResponse.json({ error: retryable ? error.message : "Export requires the latest preview and a separate explicit confirmation." }, { status: retryable ? 502 : 409 });

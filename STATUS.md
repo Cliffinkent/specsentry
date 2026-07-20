@@ -8,7 +8,7 @@ Last updated: 2026-07-20
 - Built the single Next.js TypeScript App Router application with Tailwind CSS, SQLite, SSE and local screenshot storage.
 - Implemented the deterministic Sentry Shop product, basket, guest delivery and order-review journey in explicit passing and defective modes.
 - Implemented strict Zod project, planner, executor-record and evaluator schemas.
-- Implemented the OpenAI Responses API adapter with `OPENAI_MODEL` defaulting to `gpt-5.6`, strict Structured Outputs, one controlled retry, and a computer screenshot/action loop.
+- Implemented the OpenAI Responses API adapter with `OPENAI_MODEL` defaulting to `gpt-5.6-terra`, strict Structured Outputs, one controlled retry, and a computer screenshot/action loop.
 - Confirmed the installed OpenAI SDK 6.48.0 call shapes and added 30-second/one-retry request options in the second `responses.create(body, options)` argument.
 - Fixed live computer-tool reliability: safe `Control+A` is executed as one editing chord, unsafe address-bar/navigation shortcuts remain blocked, and planner/executor instructions begin from the already-loaded staging page.
 - Added `test:live:vertical`, a secret-free metrics harness that uses the same plan/run API workflow and repeats each Sentry Shop mode three times.
@@ -80,14 +80,29 @@ The following controlled validation completed on 2026-07-20. It is a record of a
 - The public report used a temporary Cloudflare Tunnel. It proved reachability for the controlled validation but is not a permanent deployment or stable production URL.
 - No secrets were found in validation logs or responses. Required OpenAI and GitHub configuration is now present locally in ignored `.env.local`; only boolean presence checks were reported.
 
+## Railway public-demo deployment
+
+- Added a multi-stage Docker build that pins Node 24 and the official Playwright `v1.61.1-noble` image to the exact installed dependency, emits the standalone Next.js runtime, defaults to `pwuser`, and uses `tini` for signal forwarding and child-process reaping.
+- Added Railway config-as-code for Dockerfile builds, `/api/health`, bounded restart behavior and a 30-second SIGTERM drain.
+- Added a lightweight health endpoint that verifies the SQLite parent and screenshot directories are writable without calling OpenAI, opening SQLite or launching Chromium.
+- Added `SPECSENTRY_PUBLIC_DEMO=true`: only the exact Sentry Shop fixture on `PUBLIC_APP_URL` can pass plan, run and browser-network enforcement; plan/run budgets are stricter; only one run may be active; external origins and paths are rejected safely.
+- GitHub preview remains available when deliberately configured, but GitHub issue creation is blocked in both the route and export service while public-demo mode is enabled.
+- Active runs close browser resources and retain an interrupted partial report on SIGTERM. Existing SQLite initialization remains additive (`CREATE TABLE IF NOT EXISTS` plus in-place column migration) and performs no destructive startup action.
+- SQLite, WAL files and screenshots use `SPECSENTRY_DATA_DIR=/app/data`. The Railway volume must mount at `/app/data`; because Railway mounts it as root, production must set `RAILWAY_RUN_UID=0`. The image remains non-root by default elsewhere.
+- Final Railway URL: `https://YOUR-STABLE-RAILWAY-DOMAIN`.
+- Deployment, controlled redeploy persistence proof and production live-run proof are pending the Railway service connection.
+- Local deployment gate: lint and strict types passed; 68 unit/service tests across 22 files passed; the production build passed; 16 combined Playwright stories passed; and `npm audit --omit=dev` reported 0 vulnerabilities.
+- Local Docker gate: the pinned image built successfully; runtime UID was `1001 (pwuser)` with Node `v24.18.0` and Playwright `1.61.1`; home, health and persisted-runs APIs returned 200; external staging input returned 400 before OpenAI; a direct Chromium launch closed cleanly; and the process list returned to only `tini` plus `next-server`.
+- Mounted-volume restart gate: the same `/app/data` bind mount retained the SQLite/WAL files across a controlled container restart; the run API and health route remained 200; `PRAGMA integrity_check` returned `ok`; and all three expected tables were present.
+
 ## Goal 3 completion and residual risk
 
 - Goals 1–3 are functionally complete: browser evidence, human review/export, the controlled ten-case evaluation, and the demo path are implemented. Any future issue remains a new external write requiring a fresh preview and separate explicit confirmation.
 - The disposable `specsentry-export-demo` repository is only the issue-export target. It is not a source-code repository, and no source-code Git remote is configured.
 - The temporary Cloudflare Tunnel is not a deployment or backup mechanism.
 - Model output is probabilistic; the ten deterministic cases are not statistical accuracy evidence. The fixture is intentionally Chromium-only and localhost-only.
-- Local SQLite and filesystem screenshots are suitable for the controlled demo but are not durable hosted storage. A stable HTTPS origin and deployment-specific persistence plan are still required before production deployment.
+- Local SQLite and filesystem screenshots remain suitable only for controlled workflows. Railway persistence is designed around a single `/app/data` volume and must still be proven through one controlled redeploy.
 
 ## Next recommended milestone
 
-Proceed with submission preparation: capture the scripted demo, prepare repository/PR/session links, and package the tracked evaluation report. Treat production deployment as a separate milestone requiring a stable origin, hosted persistence, operational secret management, and deployment smoke validation.
+Complete the Railway service connection, volume/variable setup, stable-domain redeploy and public production verification. Then replace the URL placeholder and capture the scripted submission video from the verified stable origin.

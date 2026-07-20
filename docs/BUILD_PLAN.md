@@ -15,7 +15,7 @@ Goal 1 is complete, including the real OpenAI matrix. Goal 2 is complete, includ
 ## Locked decisions from the task brief
 
 - One deployable Node application using Next.js, TypeScript, App Router, and Tailwind CSS.
-- OpenAI Node SDK with the Responses API and `OPENAI_MODEL`, defaulting to `gpt-5.6`.
+- OpenAI Node SDK with the Responses API and `OPENAI_MODEL`, defaulting to `gpt-5.6-terra`.
 - Zod validation at every request and model-output boundary.
 - SQLite behind a small repository layer.
 - Playwright Chromium contexts fixed at 1440 x 900.

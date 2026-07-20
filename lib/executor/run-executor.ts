@@ -5,8 +5,10 @@ import type { AIProvider, ComputerAction, EvaluationPackage } from "@/lib/ai/typ
 import { evaluateEvidenceWithUsage, getAIProvider } from "@/lib/ai/services";
 import { RunBudget, RunLimitError } from "@/lib/executor/limits";
 import { playwrightKeypress } from "@/lib/executor/keyboard-policy";
+import { registerActiveRun, terminationWasRequested } from "@/lib/executor/runtime-lifecycle";
 import { getRepository, screenshotsDirectory, type RunRepository } from "@/lib/repository";
 import type { ActionRecord, PlanStep, RunStatus } from "@/lib/schemas";
+import { assertPublicDemoInput, assertPublicDemoNavigationUrl, assertPublicDemoNetworkUrl } from "@/lib/security/public-demo";
 import { assertApprovedUrl, developmentLocalhostAllowed } from "@/lib/security/url-policy";
 import { redactSensitive } from "@/lib/security/redaction";
 
@@ -129,6 +131,7 @@ function installBrowserPolicy(context: BrowserContext, page: Page, approvedHostn
     if (frame !== page.mainFrame()) return;
     try {
       assertApprovedUrl(frame.url(), approvedHostname, { allowDevelopmentLocalhost });
+      assertPublicDemoNavigationUrl(frame.url());
     } catch (error) {
       violation = redactSensitive(error);
     }
@@ -137,6 +140,7 @@ function installBrowserPolicy(context: BrowserContext, page: Page, approvedHostn
   const assertNoViolation = () => {
     if (violation) throw new BrowserPolicyError(violation);
     assertApprovedUrl(page.url(), approvedHostname, { allowDevelopmentLocalhost });
+    assertPublicDemoNavigationUrl(page.url());
   };
   return assertNoViolation;
 }
@@ -150,6 +154,7 @@ async function routeApprovedRequests(context: BrowserContext, approvedHostname: 
       return;
     }
     try {
+      assertPublicDemoNetworkUrl(requestUrl);
       assertApprovedUrl(requestUrl, approvedHostname, { allowDevelopmentLocalhost });
       await route.continue();
     } catch {
@@ -177,6 +182,10 @@ export async function executeRun(
   let page: Page | null = null;
   let captureCount = 0;
   let executionCompleted = false;
+  const unregisterActiveRun = registerActiveRun(runId, repository, async () => {
+    await context?.close().catch(() => undefined);
+    await browser?.close().catch(() => undefined);
+  });
 
   const assertNotCancelled = () => {
     if (repository.isCancellationRequested(runId)) throw new RunCancelledError();
@@ -213,6 +222,7 @@ export async function executeRun(
 
   try {
     repository.setStatus(runId, "running");
+    assertPublicDemoInput(run.request.input);
     browser = await chromium.launch({ headless: true, env: {} });
     context = await browser.newContext({
       viewport: { width: 1_440, height: 900 },
@@ -317,7 +327,10 @@ export async function executeRun(
     await browser?.close().catch(() => undefined);
   }
 
-  if (!executionCompleted) return repository.getRun(runId);
+  if (!executionCompleted || terminationWasRequested()) {
+    unregisterActiveRun();
+    return repository.getRun(runId);
+  }
 
   try {
     const completedRun = repository.getRun(runId)!;
@@ -338,12 +351,15 @@ export async function executeRun(
       },
       provider,
     );
+    if (terminationWasRequested()) return repository.getRun(runId);
     repository.addUsage(runId, "evaluator", usage);
     repository.setEvaluation(runId, evaluation);
     repository.setStatus(runId, statusFromEvaluation(evaluation.status), true);
   } catch (error) {
     repository.appendError(runId, redactSensitive(error));
     repository.setStatus(runId, "error", true);
+  } finally {
+    unregisterActiveRun();
   }
 
   return repository.getRun(runId);

@@ -2,6 +2,7 @@ import { createGitHubIssueClient, type GitHubIssueClient } from "@/lib/github/cl
 import { assertGitHubIssueUrl, githubIssueNumberSchema, readGitHubExportConfig } from "@/lib/github/config";
 import { buildGitHubIssuePreview, issueMarker } from "@/lib/github/markdown";
 import { getRepository, type RunRepository } from "@/lib/repository";
+import { assertGitHubIssueCreationAllowed } from "@/lib/security/public-demo";
 import { logServerError } from "@/lib/security/redaction";
 
 export function previewGitHubIssue(runId: string, repository: RunRepository = getRepository()) {
@@ -18,6 +19,7 @@ export async function exportGitHubIssue(
   previewToken: string,
   options: { repository?: RunRepository; client?: GitHubIssueClient } = {},
 ) {
+  assertGitHubIssueCreationAllowed();
   const repository = options.repository || getRepository();
   const run = repository.getRun(runId);
   if (!run) throw new Error("Run not found.");

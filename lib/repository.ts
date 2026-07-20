@@ -20,6 +20,9 @@ import {
   type TokenUsage,
   type UsageByPhase,
 } from "@/lib/schemas";
+import { dataDirectory, screenshotsDirectory } from "@/lib/storage";
+
+export { dataDirectory, screenshotsDirectory } from "@/lib/storage";
 
 const ZERO_USAGE: TokenUsage = { inputTokens: 0, cachedInputTokens: 0, outputTokens: 0, totalTokens: 0 };
 const ZERO_USAGE_BY_PHASE: UsageByPhase = { planner: ZERO_USAGE, executor: ZERO_USAGE, evaluator: ZERO_USAGE };
@@ -100,17 +103,6 @@ function hydrateRun(row: RunRow): RunRecord {
     completedAt: row.completed_at,
     cancelRequested: row.cancel_requested === 1,
   };
-}
-
-export function dataDirectory() {
-  const configured = process.env.SPECSENTRY_DATA_DIR;
-  return configured
-    ? path.resolve(/* turbopackIgnore: true */ configured)
-    : path.join(process.cwd(), "data");
-}
-
-export function screenshotsDirectory() {
-  return path.join(dataDirectory(), "screenshots");
 }
 
 export class RunRepository {

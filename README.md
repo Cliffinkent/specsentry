@@ -27,6 +27,50 @@ The controlled fixture is hosted inside the same application at `/demo/shop`. `?
 - Chromium installed through Playwright
 - An OpenAI API key for live GPT-5.6 and computer-tool runs; no key is needed for automated checks or the deterministic mocked demo
 
+## Railway deployment
+
+Production is one Docker-based Railway service built from `main`. The image pins Node 24 and the official Playwright `v1.61.1-noble` runtime to the exact installed Playwright version, starts the standalone Next.js server through `tini`, and defaults to the image's non-root `pwuser` account.
+
+Stable demo URL: **`https://YOUR-STABLE-RAILWAY-DOMAIN`**
+
+Create the Railway service from `Cliffinkent/specsentry`, select `main`, keep GitHub autodeploy enabled, and attach one Railway volume at `/app/data`. Configure these service variables in Railway only; never commit their values:
+
+```dotenv
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5.6-terra
+SPECSENTRY_PUBLIC_DEMO=true
+SPECSENTRY_DATA_DIR=/app/data
+PUBLIC_APP_URL=https://YOUR-STABLE-RAILWAY-DOMAIN
+GITHUB_TOKEN=
+GITHUB_OWNER=
+GITHUB_REPO=
+GITHUB_REPOSITORY_ALLOWLIST=
+```
+
+Railway volumes are mounted as root. Set `RAILWAY_RUN_UID=0` so the mounted `/app/data` directory remains writable, and set `RAILWAY_SHM_SIZE_BYTES=536870912` to give Chromium a 512 MiB shared-memory segment. The image still runs as `pwuser` anywhere the volume runtime supports non-root ownership. Do not set `ALLOW_LOCALHOST`, `OPENAI_MOCK`, or `GITHUB_MOCK` in production.
+
+Generate the stable Railway HTTPS domain first, then set `PUBLIC_APP_URL` to that exact origin and redeploy. `railway.json` configures `/api/health`, a 180-second startup health window, bounded crash restarts and a 30-second SIGTERM drain. The health route only checks that the SQLite parent and screenshot directories are writable; it does not call OpenAI, open SQLite, or launch Chromium.
+
+With `SPECSENTRY_PUBLIC_DEMO=true`, both plan and run APIs accept only the exact deployed `/demo/shop?mode=...` fixture on `PUBLIC_APP_URL`. The server applies stricter per-client and global request budgets, permits one active browser run, blocks other origins and fixture paths, and rejects GitHub issue creation at the service boundary. Exact GitHub preview remains available after all GitHub variables are deliberately configured, but the public demo cannot create an issue even with a valid token.
+
+Local Docker proof uses a disposable mounted directory:
+
+```bash
+docker build -t specsentry:railway .
+SPECSENTRY_SMOKE_DATA=$(mktemp -d)
+chmod 0777 "$SPECSENTRY_SMOKE_DATA"
+docker run --rm --init --name specsentry-smoke -p 3000:3000 \
+  -e SPECSENTRY_PUBLIC_DEMO=true \
+  -e SPECSENTRY_DATA_DIR=/app/data \
+  -e PUBLIC_APP_URL=https://specsentry.example \
+  -v "$SPECSENTRY_SMOKE_DATA:/app/data" \
+  specsentry:railway
+curl --fail http://127.0.0.1:3000/
+curl --fail http://127.0.0.1:3000/api/health
+```
+
+The root Dockerfile, `.dockerignore`, `railway.json`, `/api/health`, volume-backed SQLite/WAL files and screenshot tree are the complete deployment surface. There is no pre-deploy database command and no destructive startup migration.
+
 ## Setup
 
 ```bash
@@ -88,7 +132,7 @@ Set the following values in `.env.local`:
 
 ```dotenv
 OPENAI_API_KEY=your-key-here
-OPENAI_MODEL=gpt-5.6
+OPENAI_MODEL=gpt-5.6-terra
 OPENAI_MOCK=false
 ALLOW_LOCALHOST=true
 ```
@@ -213,7 +257,7 @@ The repository migrates existing Goal 1 databases in place. New runs use a one-t
 
 ## GPT-5.6 and Codex
 
-GPT-5.6 is the runtime model, selected through `OPENAI_MODEL` (default `gpt-5.6`). It proposes the structured plan, drives the approved computer-tool step loop and separately evaluates the resulting evidence.
+GPT-5.6 is the runtime model family, selected through `OPENAI_MODEL` (default `gpt-5.6-terra`). It proposes the structured plan, drives the approved computer-tool step loop and separately evaluates the resulting evidence.
 
 Codex built this vertical slice from the PRD: architecture, application code, controlled fixture, security boundaries, tests, debugging and documentation. Codex is not part of a running test and does not judge production results.
 

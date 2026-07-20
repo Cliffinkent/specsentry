@@ -10,7 +10,7 @@ export const OPENAI_REQUEST_OPTIONS = {
 } as const;
 
 function modelName() {
-  return process.env.OPENAI_MODEL || "gpt-5.6";
+  return process.env.OPENAI_MODEL || "gpt-5.6-terra";
 }
 
 function requireApiKey() {

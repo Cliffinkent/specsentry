@@ -1,0 +1,14 @@
+.git
+.github
+.next
+.next-*
+node_modules
+data
+.docker-smoke-data.*
+test-results
+playwright-report
+*.log
+.DS_Store
+.env*
+!.env.example
+SpecSentry Product Requirements.docx

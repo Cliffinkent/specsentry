@@ -6,7 +6,7 @@ async function main() {
     throw new Error("OPENAI_API_KEY is required for the live smoke test. Add it to .env.local or the process environment.");
   }
 
-  const model = process.env.OPENAI_MODEL || "gpt-5.6";
+  const model = process.env.OPENAI_MODEL || "gpt-5.6-terra";
   const plan = await generatePlan(
     {
       stagingUrl: "https://staging.example.com/demo/shop?mode=defective",
