@@ -19,6 +19,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <div className="mt-10 flex flex-wrap gap-4">
           <Link className="bg-[var(--ink)] px-5 py-3 font-bold text-white" href="/demo/shop?mode=defective">Open defective build</Link>
           <Link className="border border-[var(--ink)] bg-[var(--surface)] px-5 py-3 font-bold" href="/demo/shop?mode=passing">Open passing build</Link>
+          <Link className="border border-[var(--ink)] bg-[var(--surface)] px-5 py-3 font-bold" href="/demo/shop?mode=validation-missing">Open missing-validation build</Link>
+          <Link className="border border-[var(--ink)] bg-[var(--surface)] px-5 py-3 font-bold" href="/demo/shop?mode=basket-lost">Open basket-loss build</Link>
+          <Link className="border border-[var(--ink)] bg-[var(--surface)] px-5 py-3 font-bold" href="/demo/shop?mode=dependency-unavailable">Open unavailable-dependency build</Link>
         </div>
       </main>
     );

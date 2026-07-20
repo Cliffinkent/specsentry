@@ -12,7 +12,17 @@ test-results/
 blob-report/
 
 # Local databases, screenshots, and run artifacts
-data/
+data/*
+!data/evaluation-results-2026-07-20T16-39-34-803Z.json
+data/evaluation-runtime-*/
+data/screenshots/
+data/test/
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal
 *.sqlite
 *.sqlite-*
 *.db

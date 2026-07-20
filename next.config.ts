@@ -18,6 +18,10 @@ const contentSecurityPolicy = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  distDir: process.env.SPECSENTRY_NEXT_DIST_DIR || ".next",
+  typescript: {
+    tsconfigPath: process.env.SPECSENTRY_TSCONFIG_PATH || "tsconfig.json",
+  },
   async headers() {
     return [
       {

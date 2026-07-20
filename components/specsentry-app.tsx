@@ -80,15 +80,20 @@ function NewTestForm({
   onSubmit: () => void;
   busy: boolean;
 }) {
-  const loadDemo = () => {
+  const loadDemo = (mode: DemoMode = buildMode) => {
     const origin = window.location.origin;
     setInput({
-      stagingUrl: `${origin}/demo/shop?mode=${buildMode}`,
+      stagingUrl: `${origin}/demo/shop?mode=${mode}`,
       allowedHostname: window.location.hostname,
       userStory: "As a guest shopper, I need to see delivery charges before entering payment details so that I understand the full cost before buying.",
       acceptanceCriteria: "Given that I have an item in my basket, when I reach the order review page, then the delivery charge and total cost must be visible before I continue to payment.",
       startingInstructions: "Use the Alpine Trail Backpack and deterministic demo delivery details. Stop on order review; never continue towards payment.",
     });
+  };
+
+  const loadBuildWeekDemo = () => {
+    setBuildMode("defective");
+    loadDemo("defective");
   };
 
   return (
@@ -111,7 +116,10 @@ function NewTestForm({
               <option value="passing">Passing build</option>
             </select>
           </Field>
-          <button type="button" onClick={loadDemo} className="border border-[var(--ink)] px-5 py-3 text-sm font-black uppercase tracking-[0.1em] hover:bg-[var(--signal)]">Load demo</button>
+          <div className="flex flex-wrap gap-3">
+            <button type="button" onClick={() => loadDemo()} className="border border-[var(--ink)] px-5 py-3 text-sm font-black uppercase tracking-[0.1em] hover:bg-[var(--signal)]">Load demo</button>
+            <button type="button" onClick={loadBuildWeekDemo} className="bg-[var(--signal)] px-5 py-3 text-sm font-black uppercase tracking-[0.1em] shadow-[3px_3px_0_var(--ink)]">Load Build Week demo</button>
+          </div>
         </div>
 
         <div className="mt-7 grid gap-6">

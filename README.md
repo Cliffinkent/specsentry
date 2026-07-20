@@ -16,8 +16,9 @@ SpecSentry turns a written acceptance criterion into an approved browser journey
 8. A failed finding starts as a persisted draft with an immutable AI original, editable human copy, read-only evidence, and explicit approve/reject/reopen transitions.
 9. An approved finding can render the exact GitHub title and Markdown body; a separate confirmation creates at most one issue and stores its URL.
 10. Planner, computer executor and evaluator token usage is persisted and shown by phase without a cost estimate.
+11. A fixed ten-case evaluation catalog runs selected cases or the complete set through a real-by-default managed workflow and emits evidence-integrity checks, controlled-set metrics, and a submission report.
 
-The controlled fixture is hosted inside the same application at `/demo/shop`. `?mode=defective` withholds delivery charge and final total on order review; `?mode=passing` shows both before payment.
+The controlled fixture is hosted inside the same application at `/demo/shop`. `?mode=passing` provides the corrected journey; `?mode=defective` withholds delivery charge and final total; `?mode=validation-missing` accepts empty required delivery data; `?mode=basket-lost` drops the selected product at review; and `?mode=dependency-unavailable` exposes a defined unavailable prerequisite.
 
 ## Requirements
 
@@ -48,7 +49,7 @@ Then start the one Node application:
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), choose a fixture build, click **Load demo**, generate the plan, review it, and click **Approve plan & start run**. Screenshots and `specsentry.sqlite` are created below the gitignored `data` directory. Recent reports can be reopened from the home screen without rerunning the test.
+Open [http://localhost:3000](http://localhost:3000), choose a fixture build, click **Load demo**, generate the plan, review it, and click **Approve plan & start run**. For the submission journey, **Load Build Week demo** fills the defective delivery-charge story in one click. Screenshots and `specsentry.sqlite` are created below the gitignored `data` directory. Recent reports can be reopened from the home screen without rerunning the test.
 
 ## Human review and GitHub export
 
@@ -114,6 +115,27 @@ LIVE_BASE_URL=http://127.0.0.1:3100 npm run test:live:vertical
 
 `test:live:vertical` runs each fixture mode three times through the same plan and run APIs used by the UI. It prints one compact `LIVE_RESULT` per run and writes a secret-free metrics file below gitignored `data/`. `LIVE_RUNS_PER_MODE=1` or `2` can reduce repetitions during diagnosis.
 
+## Controlled ten-case evaluation
+
+The Goal 3 catalog is fixed at five expected passes, three distinct clear failures, one unavailable-prerequisite block, and one deliberately ambiguous criterion. Run the complete set with the real OpenAI planner, computer executor, and evaluator:
+
+```bash
+npm run evaluate
+```
+
+The command loads `.env.local`, starts its own isolated localhost Next.js server, persists case IDs and run IDs, validates evidence/action/file mappings, writes `data/evaluation-results-<timestamp>.json`, refreshes `docs/EVALUATION_REPORT.md`, and shuts down the managed server in `finally`. Live mode is the default and exits non-zero with a clear message if `OPENAI_API_KEY` is absent. It never calls the GitHub export route.
+
+Select one or more cases during diagnosis, or deliberately choose the deterministic mock:
+
+```bash
+npm run evaluate -- --case SS-EVAL-07,SS-EVAL-09
+npm run evaluate -- --mock
+```
+
+`--mock` is the only mock selector; live cases are never silently skipped. The complete real-model run on 2026-07-20 used `gpt-5.6-terra` and produced 5/5 expected passes with zero false failures, 3/3 high-severity evidence-backed failures, 1/1 blocked, and 1/1 inconclusive. There were zero retries, off-domain navigations, or runs with missing screenshots. See [the controlled evaluation report](docs/EVALUATION_REPORT.md) for every case, run ID, evidence reference, duration, action count, and token total. These are controlled fixture counts, not a statistical accuracy claim.
+
+The maximum-2:50 recording sequence, fallback run, and edit points are in [the Build Week demo script](docs/DEMO_SCRIPT.md).
+
 ### Verified live behavior
 
 On 2026-07-18, OpenAI SDK 6.48.0 with `OPENAI_MODEL=gpt-5.6-terra` produced this post-fix matrix:
@@ -137,6 +159,7 @@ npm run typecheck
 npm test
 npm run build
 npm run test:e2e:fixture
+npm run test:e2e:evaluation-fixture
 npm run test:e2e:vertical
 npm run test:e2e
 npm audit --omit=dev
@@ -144,8 +167,9 @@ npm audit --omit=dev
 
 - `npm test` covers planner/evaluator schemas, invalid-output retry, usage aggregation, review transitions, original preservation, evidence ownership, GitHub allow-list/URL validation, escaped preview, safe failures, idempotency, exact-host/private-network rules, same-origin action enforcement, rate limiting, action/timeout/retry limits and report trace creation.
 - `npm run test:e2e:fixture` verifies explicit mode selection plus the passing and defective checkout behavior.
-- `npm run test:e2e:vertical` runs the same user workflow twice with mocked OpenAI and GitHub calls: defective continues through edit/save, reject/reopen, approve, exact preview, separate confirmation and one locked export; passing produces a pass with no finding.
-- `npm run test:e2e` runs all five fixture and mocked vertical cases together.
+- `npm run test:e2e:evaluation-fixture` verifies all ten catalog-specific deterministic fixture outcomes.
+- `npm run test:e2e:vertical` runs the same user workflow with mocked OpenAI and GitHub calls: Build Week loading needs no manual entry; defective continues through edit/save, reject/reopen, approve, exact preview, separate confirmation and one locked export; passing produces a pass with no finding.
+- `npm run test:e2e` runs the fixture, ten-case fixture, Build Week loader, and mocked vertical workflow together.
 
 Automated tests set `OPENAI_MOCK=true`; they never spend API credits or depend on model availability.
 
@@ -193,8 +217,6 @@ GPT-5.6 is the runtime model, selected through `OPENAI_MODEL` (default `gpt-5.6`
 
 Codex built this vertical slice from the PRD: architecture, application code, controlled fixture, security boundaries, tests, debugging and documentation. Codex is not part of a running test and does not judge production results.
 
-## Deliberate Goal 2 boundaries
+## Deliberate Goal 3 boundaries
 
-This slice does not include authentication, user-provided tokens, Markdown uploads, Supabase, hosted object storage, mobile/cross-browser testing, generated regression tests, CI integration, deployment, automatic code fixes or the broader ten-case evaluation set. GitHub issue export is the only external write and remains server-configured, repository-allow-listed, human-previewed and explicitly confirmed. Goal 2's controlled live export gate is complete; the temporary public tunnel used for that proof is not a deployment.
-
-Recommended Goal 3: add the broader seeded evaluation set across passing, failing, blocked and ambiguous criteria before expanding to team authentication, hosted storage or deployment.
+This slice now includes the controlled ten-case fixture evaluation, but still excludes authentication, user-provided tokens, Markdown uploads, Supabase, hosted object storage, mobile/cross-browser testing, generated fixes, CI integration, deployment, and new external integrations. GitHub issue export remains the only external write and stays server-configured, repository-allow-listed, human-previewed, and explicitly confirmed. The evaluation runner never exports. Goal 2's one controlled live export remains readable; the temporary public tunnel used for that proof is not a deployment.

@@ -15,8 +15,10 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:fixture": "playwright test tests/e2e/shop.spec.ts",
+    "test:e2e:evaluation-fixture": "playwright test tests/e2e/shop-evaluation.spec.ts",
     "test:e2e:vertical": "playwright test tests/e2e/vertical-slice.spec.ts",
     "test:live:vertical": "node --env-file-if-exists=.env.local --import tsx scripts/live-vertical.ts",
+    "evaluate": "node --env-file-if-exists=.env.local --import tsx scripts/evaluate.ts",
     "smoke:live": "node --env-file-if-exists=.env.local --import tsx scripts/live-smoke.ts"
   },
   "dependencies": {

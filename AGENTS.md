@@ -20,8 +20,10 @@
 - `npm test` - run unit and service tests with mocked OpenAI behavior.
 - `npm run build` - produce the deployable Next.js build.
 - `npm run test:e2e:fixture` - verify passing and defective Sentry Shop modes.
+- `npm run test:e2e:evaluation-fixture` - verify all ten catalog-specific Sentry Shop behaviors.
 - `npm run test:e2e:vertical` - verify the mocked approved workflow in both modes.
 - `npm run smoke:live` - make the separately documented live OpenAI smoke call when a key is available.
+- `npm run evaluate` - run the complete ten-case real OpenAI evaluation; use `-- --case SS-EVAL-01` to select and `-- --mock` only for an explicit mock run.
 
 ## Security invariants
 
@@ -39,7 +41,10 @@
 - Treat review evidence references as read-only run-owned data. Escape human/model text before Markdown export and emit only normalized GitHub issue URLs.
 - Use an atomic export claim plus the persisted idempotency marker/issue URL; approval must never create an issue, and successful exports remain locked without an administrative reset.
 - GitHub failures must retain approved state, clear the in-progress claim, store only a safe diagnostic and expose no token, header or raw response body.
+- Evaluation findings must reference screenshot identifiers recorded by the same run and backed by non-empty persisted files.
+- Evaluation outputs must remain secret-free, and the managed evaluation server and every browser context must close even after failure.
+- Passing, blocked and inconclusive evaluation cases must never create findings; the evaluation runner must never call GitHub export.
 
 ## Scope boundaries
 
-Goal 2 is limited to human review and explicitly confirmed GitHub issue export for the delivery-charge vertical slice. Do not add authentication, user-supplied tokens, Markdown uploads, Supabase, hosted storage, mobile/cross-browser testing, generated regression tests, CI integration, deployment, automatic code fixes or the broader ten-case evaluation set. Never create a live issue from an unattended test or agent run.
+Goal 3 includes only the fixed controlled ten-case fixture evaluation, evidence/metric artifacts and demo hardening. Do not add authentication, user-supplied tokens, Markdown uploads, Supabase, hosted storage, mobile/cross-browser testing, CI integration, deployment, automatic code fixes or new external integrations. Never create a live issue from an unattended test, evaluation or agent run.

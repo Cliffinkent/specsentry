@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-export const demoModeSchema = z.enum(["passing", "defective"]);
+export const demoModeSchema = z.enum([
+  "passing",
+  "defective",
+  "validation-missing",
+  "basket-lost",
+  "dependency-unavailable",
+]);
 
 export const newTestInputSchema = z
   .object({
@@ -9,6 +15,7 @@ export const newTestInputSchema = z
     userStory: z.string().trim().min(10).max(8_000),
     acceptanceCriteria: z.string().trim().min(10).max(12_000),
     startingInstructions: z.string().trim().max(4_000).default(""),
+    evaluationCaseId: z.string().trim().min(1).max(80).optional(),
   })
   .strict();
 

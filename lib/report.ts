@@ -24,6 +24,7 @@ export function buildRunReport(run: RunRecord) {
 
   return {
     id: run.id,
+    evaluationCaseId: run.request.input.evaluationCaseId || null,
     status: run.status,
     durationMs,
     startedAt: run.startedAt,

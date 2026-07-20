@@ -3,7 +3,7 @@ import { expect, type Page, test } from "@playwright/test";
 async function loadDemoAndRun(page: Page, mode: "defective" | "passing") {
   await page.goto("/");
   await page.getByLabel("Demo fixture build").selectOption(mode);
-  await page.getByRole("button", { name: "Load demo" }).click();
+  await page.getByRole("button", { name: "Load demo", exact: true }).click();
   await expect(page.getByLabel("Staging URL")).toHaveValue(new RegExp(`/demo/shop\\?mode=${mode}$`));
   await page.getByRole("button", { name: "Generate test plan" }).click();
   await expect(page.getByRole("heading", { name: "Review every step." })).toBeVisible();
@@ -13,6 +13,17 @@ async function loadDemoAndRun(page: Page, mode: "defective" | "passing") {
   await expect(page.getByText("Live isolated run")).toBeVisible();
   await expect(page.getByText("Run report", { exact: false })).toBeVisible({ timeout: 90_000 });
 }
+
+test("Build Week demo loading fills the defective journey without manual entry", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Demo fixture build").selectOption("passing");
+  await page.getByRole("button", { name: "Load Build Week demo", exact: true }).click();
+  await expect(page.getByLabel("Demo fixture build")).toHaveValue("defective");
+  await expect(page.getByLabel("Staging URL")).toHaveValue(/\/demo\/shop\?mode=defective$/);
+  await expect(page.getByLabel("User story")).toHaveValue(/guest shopper/i);
+  await expect(page.getByLabel("Acceptance criteria")).toHaveValue(/delivery charge and total cost/i);
+  await expect(page.getByLabel("Starting instructions \(optional\)")).toHaveValue(/Alpine Trail Backpack/);
+});
 
 test("approved workflow creates a high-confidence evidence-backed failure for the defective build", async ({ page }) => {
   await loadDemoAndRun(page, "defective");

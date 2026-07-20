@@ -4,13 +4,13 @@ Last updated: 2026-07-20
 
 ## Goal
 
-Build and verify the first complete SpecSentry vertical slice, then add Goal 2 human finding review and explicitly confirmed, idempotent GitHub issue export without weakening the evidence boundary.
+Build and verify the first complete SpecSentry vertical slice, add Goal 2 human finding review and explicitly confirmed idempotent GitHub issue export, then complete Goal 3's controlled ten-case reliability evaluation and submission demo without weakening the evidence boundary.
 
 ## Current gate
 
 **Requirements verified:** `SpecSentry Product Requirements.docx` was added, rendered and visually reviewed across all 20 pages, then extracted without changing its wording to `docs/SpecSentry-PRD.md`.
 
-Goal 1 is complete, including the real OpenAI matrix. Goal 2 is complete, including persisted human review, exact GitHub preview/export, per-phase token usage and the one controlled live export recorded below. Authentication, user-provided tokens, Markdown upload, Supabase, hosted object storage, generated regression tests, CI integration, mobile/cross-browser testing, automatic fixes and the wider ten-case set remain out of scope. Goal 3 remains the broader seeded evaluation set.
+Goal 1 is complete, including the real OpenAI matrix. Goal 2 is complete, including persisted human review, exact GitHub preview/export, per-phase token usage and the one controlled live export recorded below. Goal 3 is complete, including the exactly ten-case seeded evaluation, real-model metrics, evidence integrity, and the sub-three-minute demo script. Authentication, user-provided tokens, Markdown upload, Supabase, hosted object storage, CI integration, mobile/cross-browser testing, automatic fixes, deployment and new external integrations remain out of scope.
 
 ## Locked decisions from the task brief
 
@@ -23,6 +23,7 @@ Goal 1 is complete, including the real OpenAI matrix. Goal 2 is complete, includ
 - Sentry Shop under `/demo/shop`, with explicit passing and defective modes.
 - Screenshots in a gitignored local data directory.
 - Automated tests mock OpenAI; separately documented smoke and six-run browser verification commands require a real API key and fail clearly when live configuration is missing.
+- The ten-case evaluation runner uses real OpenAI by default, permits mocks only through an explicit flag, and owns/shuts down its isolated server process.
 - No authentication, uploads, Supabase, mobile testing, generated regression suites, CI integration, automated fixes or deployment. GitHub issue creation is the one allowed external write and requires a human-reviewed preview plus separate explicit confirmation.
 
 ## Milestones
@@ -111,6 +112,19 @@ Goal 1 is complete, including the real OpenAI matrix. Goal 2 is complete, includ
 - [x] Cover the workflow with mocked GitHub unit/service tests and Playwright; never create a live issue unattended.
 - [x] Complete one explicitly confirmed live export, verify the stored GitHub title/body hash, prove idempotent stored-URL reuse and confirm that no duplicate issue exists.
 
+### Milestone 8 - Controlled evaluation and Build Week demo
+
+- [x] Define exactly ten cases: five positive passes, three distinct seeded failures, one blocked prerequisite, and one ambiguous criterion.
+- [x] Add only the validation-missing, basket-lost and dependency-unavailable fixture behavior required by the catalog while retaining the existing passing/defective path.
+- [x] Persist a case ID alongside every evaluation run and capture status, severity, confidence, duration, actions, retries, screenshots and per-phase usage.
+- [x] Validate evaluator evidence against persisted actions and non-empty screenshot files; count off-domain navigation and missing screenshots.
+- [x] Add a real-by-default managed runner with selected-case support, explicit `--mock`, clear missing-key exit, rate-limit handling, isolated Next.js state and process shutdown.
+- [x] Calculate only controlled-set counts plus total/median duration, total/median actions, retries and token usage by phase/case.
+- [x] Add fixture, blocked, inconclusive, no-finding, integrity, metrics, persistence, missing-key and Build Week loader regressions.
+- [x] Run the complete real OpenAI set: 5/5 pass, 3/3 fail/high, 1/1 blocked, 1/1 inconclusive, with no missing screenshots, off-domain navigation or retries.
+- [x] Generate `data/evaluation-results-<timestamp>.json`, `docs/EVALUATION_REPORT.md`, and a maximum-2:50 `docs/DEMO_SCRIPT.md` with a persisted-run fallback.
+- [x] Add one-click **Load Build Week demo** while keeping GitHub issue creation behind separate explicit confirmation.
+
 ## Required validation ledger
 
 Record the exact command, exit status, and relevant counts here as each gate is completed.
@@ -119,18 +133,24 @@ Record the exact command, exit status, and relevant counts here as each gate is 
 | --- | --- | --- |
 | Lint | `npm run lint` | Passed, exit 0 on 2026-07-20 |
 | TypeScript | `npm run typecheck` | Passed, exit 0 on 2026-07-20 |
-| Automated tests | `npm test` | Passed on 2026-07-20: 11 files, 44 tests |
+| Automated tests | `npm test` | Passed on 2026-07-20: 19 files, 60 tests |
 | Production build | `npm run build` | Passed on 2026-07-20: Next.js 16.2.10 compiled and generated all routes |
-| Complete browser suite | `npm run test:e2e` | Passed on 2026-07-20: 5 tests in 17.5s using mocked providers and isolated local output/data |
+| Complete browser suite | `npm run test:e2e` | Passed on 2026-07-20: 16 tests in 18.5s using mocked providers and isolated local output/data |
 | Production dependency audit | `npm audit --omit=dev` | Passed on 2026-07-20: 0 vulnerabilities |
-| Mocked review/export | `npm run test:e2e` | Passed: edit/save, reject/reopen, approve, exact preview, separate confirmation, one mocked issue, export lock and all usage phases |
+| Ten fixture behaviors | `npm run test:e2e:evaluation-fixture` | Passed on 2026-07-20: 10/10 catalog-specific fixture stories |
+| Mocked review/export | `npm run test:e2e` | Passed: Build Week load, edit/save, reject/reopen, approve, exact preview, separate confirmation, one mocked issue, export lock and all usage phases |
+| Complete mocked evaluation | `npm run evaluate -- --mock` | Passed: 10/10 expected classifications; all evidence/action/file checks passed |
 | Live environment configuration | boolean-only server environment check | Required OpenAI and GitHub values are present in ignored `.env.local`; no value was printed |
 | Controlled live GitHub export | explicit human confirmation and read-only follow-up | Complete: issue #1 created once; repeat returned `existing: true`; exactly one open issue remains |
 | Missing live configuration | `OPENAI_API_KEY= npm run smoke:live` | Failed clearly as intended, exit 1 |
-| Live smoke | `npm run smoke:live` | Passed: real `gpt-5.6-terra` schema-valid plan, 5 steps, 1 checkpoint |
+| Missing evaluation key | `OPENAI_API_KEY= npm run evaluate -- --case SS-EVAL-01` | Failed clearly as intended, exit 1; no server or run created |
+| Live smoke | `npm run smoke:live` | Passed: real `gpt-5.6-terra` schema-valid plan, 4 steps, 4 checkpoints |
 | Live browser matrix | `npm run test:live:vertical` | Passed: 6/6 expected outcomes; metrics recorded below |
+| Complete live evaluation | `npm run evaluate` | Passed: 10/10 expected classifications; controlled targets and metrics in `docs/EVALUATION_REPORT.md` |
+| Evaluation secret scan | configured-value and header scan | Passed across 163 evaluation files; no key/token values or credential headers found |
+| Cleanup audit | listener and process checks | Passed: no managed evaluation/Playwright listener, Chromium process or validation server remained |
 
-The 2026-07-20 local gates forced `OPENAI_MOCK=true` and `GITHUB_MOCK=true`. Test data was redirected outside the repository's preserved `data/` directory. Turbopack and Playwright required permission to bind local internal/test ports in this environment; their successful reruns did not call OpenAI or GitHub.
+The 2026-07-20 Playwright gates forced `OPENAI_MOCK=true` and `GITHUB_MOCK=true`, with test data redirected outside the repository's preserved `data/` directory. Turbopack and Playwright required permission to bind local internal/test ports in this environment; those automated gates did not call OpenAI or GitHub. The separate complete evaluation explicitly used the live provider and never called GitHub export.
 
 ## Controlled live export ledger
 
@@ -169,4 +189,4 @@ Passing results have no finding, so finding-level confidence is intentionally ab
 
 ## Completion standard
 
-Goals 1 and 2 are complete: the evidence-backed browser outcomes are stable, failed findings persist through every human review transition, exact preview and explicit confirmation remain distinct, mocked and controlled live export are idempotent, usage is visible by phase, and all automated gates pass. The completed live issue does not authorize another export; every future issue remains a separate manual gate. Goal 3 is the broader seeded evaluation set.
+Goals 1–3 are complete: the evidence-backed browser outcomes are stable, failed findings persist through every human review transition, exact preview and explicit confirmation remain distinct, mocked and controlled live export are idempotent, usage is visible by phase, the fixed ten-case set meets every controlled target, and the Build Week demo requires no manual data entry. The completed live issue does not authorize another export; every future issue remains a separate manual gate. Production deployment still requires a stable public origin and durable hosted persistence.

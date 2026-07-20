@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import type { DemoMode } from "@/lib/schemas";
 
-type Stage = "product" | "basket" | "delivery" | "review" | "payment";
+type Stage = "product" | "basket" | "delivery" | "dependency" | "review" | "payment";
 
 const product = {
   name: "Alpine Trail Backpack",
@@ -39,9 +39,26 @@ function Progress({ stage }: { stage: Stage }) {
 
 export function ShopJourney({ mode }: { mode: DemoMode }) {
   const [stage, setStage] = useState<Stage>("product");
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [missingDeliveryDetails, setMissingDeliveryDetails] = useState(false);
 
   function submitDelivery(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const requiredFields: Array<[string, string]> = [
+      ["name", "Enter your full name."],
+      ["email", "Enter your email address."],
+      ["address", "Enter address line 1."],
+      ["city", "Enter your town or city."],
+      ["postcode", "Enter your postcode."],
+    ];
+    const missing = requiredFields.filter(([name]) => !String(form.get(name) || "").trim());
+    if (missing.length > 0 && mode !== "validation-missing") {
+      setValidationError(missing[0][1]);
+      return;
+    }
+    setValidationError(null);
+    setMissingDeliveryDetails(missing.length > 0);
     setStage("review");
   }
 
@@ -58,7 +75,7 @@ export function ShopJourney({ mode }: { mode: DemoMode }) {
       </header>
 
       <div className="mx-auto max-w-6xl px-6 py-8">
-        {stage !== "product" && <Progress stage={stage} />}
+        {stage !== "product" && <Progress stage={stage === "dependency" ? "delivery" : stage} />}
 
         {stage === "product" && (
           <section aria-labelledby="product-title" className="grid gap-10 py-8 md:grid-cols-2">
@@ -89,7 +106,18 @@ export function ShopJourney({ mode }: { mode: DemoMode }) {
               </div>
               <div className="mt-8 flex justify-between border-t border-[#d8d2c3] pt-5 text-lg"><span>Basket subtotal</span><strong>{money(product.price)}</strong></div>
             </div>
-            <button type="button" onClick={() => setStage("delivery")} className="mt-8 w-full bg-[#17211b] px-5 py-4 font-black uppercase tracking-[0.12em] text-white">Continue as guest</button>
+            <button type="button" onClick={() => setStage(mode === "dependency-unavailable" ? "dependency" : "delivery")} className="mt-8 w-full bg-[#17211b] px-5 py-4 font-black uppercase tracking-[0.12em] text-white">Continue as guest</button>
+          </section>
+        )}
+
+        {stage === "dependency" && (
+          <section aria-labelledby="dependency-title" className="mx-auto max-w-3xl py-12">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#a34c23]">Defined test prerequisite</p>
+            <h1 id="dependency-title" className="mt-3 text-5xl font-black tracking-[-0.05em]">Delivery quote sandbox unavailable</h1>
+            <div data-testid="dependency-blocker" className="mt-8 border-l-4 border-[#a34c23] bg-[#fff2ec] p-6">
+              <p className="font-bold">The deliberately unavailable fixture dependency could not provide a delivery quote.</p>
+              <p className="mt-3 text-sm leading-6 text-[#5a655e]">Guest delivery cannot be evaluated until this defined prerequisite is restored. No product defect is asserted by this fixture state.</p>
+            </div>
           </section>
         )}
 
@@ -98,11 +126,12 @@ export function ShopJourney({ mode }: { mode: DemoMode }) {
             <h1 id="delivery-title" className="text-5xl font-black tracking-[-0.05em]">Delivery details</h1>
             <p className="mt-4 text-[#5a655e]">Use deterministic demo details. No account or payment is created.</p>
             <form onSubmit={submitDelivery} className="mt-8 grid gap-5 sm:grid-cols-2">
-              <label className="grid gap-2 text-sm font-bold">Full name<input required name="name" autoComplete="off" className="border border-[#948f84] bg-white px-4 py-3 font-normal" /></label>
-              <label className="grid gap-2 text-sm font-bold">Email address<input required name="email" type="email" autoComplete="off" className="border border-[#948f84] bg-white px-4 py-3 font-normal" /></label>
-              <label className="grid gap-2 text-sm font-bold sm:col-span-2">Address line 1<input required name="address" autoComplete="off" className="border border-[#948f84] bg-white px-4 py-3 font-normal" /></label>
-              <label className="grid gap-2 text-sm font-bold">Town or city<input required name="city" autoComplete="off" className="border border-[#948f84] bg-white px-4 py-3 font-normal" /></label>
-              <label className="grid gap-2 text-sm font-bold">Postcode<input required name="postcode" autoComplete="off" className="border border-[#948f84] bg-white px-4 py-3 font-normal" /></label>
+              <label className="grid gap-2 text-sm font-bold">Full name<input aria-required="true" name="name" autoComplete="off" className="border border-[#948f84] bg-white px-4 py-3 font-normal" /></label>
+              <label className="grid gap-2 text-sm font-bold">Email address<input aria-required="true" name="email" type="email" autoComplete="off" className="border border-[#948f84] bg-white px-4 py-3 font-normal" /></label>
+              <label className="grid gap-2 text-sm font-bold sm:col-span-2">Address line 1<input aria-required="true" name="address" autoComplete="off" className="border border-[#948f84] bg-white px-4 py-3 font-normal" /></label>
+              <label className="grid gap-2 text-sm font-bold">Town or city<input aria-required="true" name="city" autoComplete="off" className="border border-[#948f84] bg-white px-4 py-3 font-normal" /></label>
+              <label className="grid gap-2 text-sm font-bold">Postcode<input aria-required="true" name="postcode" autoComplete="off" className="border border-[#948f84] bg-white px-4 py-3 font-normal" /></label>
+              {validationError && <p role="alert" data-testid="delivery-validation" className="border-l-4 border-[#a34c23] bg-[#fff2ec] p-4 text-sm font-bold sm:col-span-2">{validationError}</p>}
               <button type="submit" className="mt-4 bg-[#17211b] px-5 py-4 font-black uppercase tracking-[0.12em] text-white sm:col-span-2">Review order</button>
             </form>
           </section>
@@ -113,16 +142,28 @@ export function ShopJourney({ mode }: { mode: DemoMode }) {
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d5d52]">Check before continuing</p>
             <h1 id="review-title" className="mt-3 text-5xl font-black tracking-[-0.05em]">Order review</h1>
             <div className="mt-8 border border-[#d8d2c3] bg-[#fffdf8] p-6 shadow-[6px_6px_0_#17211b]">
-              <div className="flex justify-between border-b border-[#d8d2c3] pb-5"><span>{product.name}</span><strong>{money(product.price)}</strong></div>
-              <div data-testid="review-subtotal" className="flex justify-between pt-5"><span>Basket subtotal</span><strong>{money(product.price)}</strong></div>
-              {mode === "passing" && (
+              {mode === "basket-lost" ? (
+                <div data-testid="review-empty-basket" className="border-l-4 border-[#a34c23] bg-[#fff2ec] p-5">
+                  <strong>Your basket is empty</strong>
+                  <p className="mt-2 text-sm text-[#6b5f54]">The selected product is no longer present in this order summary.</p>
+                </div>
+              ) : (
                 <>
-                  <div data-testid="review-delivery" className="mt-4 flex justify-between"><span>Delivery charge</span><strong>{money(deliveryCharge)}</strong></div>
-                  <div data-testid="review-total" className="mt-5 flex justify-between border-t-2 border-[#17211b] pt-5 text-xl"><span>Final total</span><strong>{money(product.price + deliveryCharge)}</strong></div>
+                  <div className="flex justify-between border-b border-[#d8d2c3] pb-5"><span>{product.name}</span><strong>{money(product.price)}</strong></div>
+                  <div data-testid="review-subtotal" className="flex justify-between pt-5"><span>Basket subtotal</span><strong>{money(product.price)}</strong></div>
+                  {mode !== "defective" && (
+                    <>
+                      <div data-testid="review-delivery" className="mt-4 flex justify-between"><span>Delivery charge</span><strong>{money(deliveryCharge)}</strong></div>
+                      <div data-testid="review-total" className="mt-5 flex justify-between border-t-2 border-[#17211b] pt-5 text-xl"><span>Final total</span><strong>{money(product.price + deliveryCharge)}</strong></div>
+                    </>
+                  )}
+                  {mode === "defective" && <p data-testid="review-missing-costs" className="mt-5 border-t border-[#d8d2c3] pt-5 text-sm text-[#6b5f54]">Additional costs are shown on the next step.</p>}
                 </>
               )}
-              {mode === "defective" && <p data-testid="review-missing-costs" className="mt-5 border-t border-[#d8d2c3] pt-5 text-sm text-[#6b5f54]">Additional costs are shown on the next step.</p>}
             </div>
+            {mode === "validation-missing" && missingDeliveryDetails && (
+              <p role="alert" data-testid="missing-validation-warning" className="mt-6 border-l-4 border-[#a34c23] bg-[#fff2ec] p-4 font-bold">Delivery details were accepted while required fields were empty.</p>
+            )}
             <button type="button" onClick={() => setStage("payment")} className="mt-8 w-full bg-[#17211b] px-5 py-4 font-black uppercase tracking-[0.12em] text-white">Continue towards payment</button>
           </section>
         )}
