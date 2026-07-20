@@ -31,7 +31,7 @@ The controlled fixture is hosted inside the same application at `/demo/shop`. `?
 
 Production is one Docker-based Railway service built from `main`. The image pins Node 24 and the official Playwright `v1.61.1-noble` runtime to the exact installed Playwright version, starts the standalone Next.js server through `tini`, and defaults to the image's non-root `pwuser` account.
 
-Stable demo URL: **`https://YOUR-STABLE-RAILWAY-DOMAIN`**
+Stable demo URL: **[https://specsentry-production.up.railway.app](https://specsentry-production.up.railway.app)**
 
 Create the Railway service from `Cliffinkent/specsentry`, select `main`, keep GitHub autodeploy enabled, and attach one Railway volume at `/app/data`. Configure these service variables in Railway only; never commit their values:
 
@@ -40,7 +40,7 @@ OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5.6-terra
 SPECSENTRY_PUBLIC_DEMO=true
 SPECSENTRY_DATA_DIR=/app/data
-PUBLIC_APP_URL=https://YOUR-STABLE-RAILWAY-DOMAIN
+PUBLIC_APP_URL=https://specsentry-production.up.railway.app
 GITHUB_TOKEN=
 GITHUB_OWNER=
 GITHUB_REPO=
@@ -50,6 +50,8 @@ GITHUB_REPOSITORY_ALLOWLIST=
 Railway volumes are mounted as root. Set `RAILWAY_RUN_UID=0` so the mounted `/app/data` directory remains writable, and set `RAILWAY_SHM_SIZE_BYTES=536870912` to give Chromium a 512 MiB shared-memory segment. The image still runs as `pwuser` anywhere the volume runtime supports non-root ownership. Do not set `ALLOW_LOCALHOST`, `OPENAI_MOCK`, or `GITHUB_MOCK` in production.
 
 Generate the stable Railway HTTPS domain first, then set `PUBLIC_APP_URL` to that exact origin and redeploy. `railway.json` configures `/api/health`, a 180-second startup health window, bounded crash restarts and a 30-second SIGTERM drain. The health route only checks that the SQLite parent and screenshot directories are writable; it does not call OpenAI, open SQLite, or launch Chromium.
+
+Production verification on 20 July 2026 completed a real defective Build Week run at the stable origin. Run `0fc601eb-d273-4c70-af47-b77fac2ba99e` produced the expected high-severity finding with 24 recorded actions and 24 screenshots, retained its approved review and 1440 x 900 evidence after a controlled Railway redeploy, and generated the exact GitHub preview without creating an issue.
 
 With `SPECSENTRY_PUBLIC_DEMO=true`, both plan and run APIs accept only the exact deployed `/demo/shop?mode=...` fixture on `PUBLIC_APP_URL`. The server applies stricter per-client and global request budgets, permits one active browser run, blocks other origins and fixture paths, and rejects GitHub issue creation at the service boundary. Exact GitHub preview remains available after all GitHub variables are deliberately configured, but the public demo cannot create an issue even with a valid token.
 

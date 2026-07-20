@@ -89,8 +89,13 @@ The following controlled validation completed on 2026-07-20. It is a record of a
 - GitHub preview remains available when deliberately configured, but GitHub issue creation is blocked in both the route and export service while public-demo mode is enabled.
 - Active runs close browser resources and retain an interrupted partial report on SIGTERM. Existing SQLite initialization remains additive (`CREATE TABLE IF NOT EXISTS` plus in-place column migration) and performs no destructive startup action.
 - SQLite, WAL files and screenshots use `SPECSENTRY_DATA_DIR=/app/data`. The Railway volume must mount at `/app/data`; because Railway mounts it as root, production must set `RAILWAY_RUN_UID=0`. The image remains non-root by default elsewhere.
-- Final Railway URL: `https://YOUR-STABLE-RAILWAY-DOMAIN`.
-- Deployment, controlled redeploy persistence proof and production live-run proof are pending the Railway service connection.
+- Final Railway URL: [https://specsentry-production.up.railway.app](https://specsentry-production.up.railway.app).
+- Railway project `authentic-comfort` has one `specsentry` service connected to `Cliffinkent/specsentry` `main`, with GitHub auto-deploy enabled and one volume mounted at `/app/data`.
+- Production home and `/api/health` returned HTTP 200; health reported writable storage and `public-demo` mode without starting Chromium or calling OpenAI.
+- Live production run `0fc601eb-d273-4c70-af47-b77fac2ba99e` completed in 35.8 seconds with 24 recorded actions and 24 screenshots. It produced the expected failed/high finding at 99% confidence and stopped at order review before payment.
+- The finding was human-approved, and the exact GitHub issue preview rendered with an absolute report URL and public evidence URL. Public-demo mode explicitly reported issue creation disabled; the configured repository issue count remained `1` before and after preview.
+- A controlled Railway redeploy completed successfully. The same run, approved review state and 1440 x 900 selected evidence remained publicly readable afterwards.
+- An external `https://example.com/` staging target was rejected with a safe client error. Runtime logs contained neither configured secret, `/app/data`, raw-model markers nor application errors, and the post-run container process list contained only `tini`, `next-server` and the temporary console shell/`ps` command—no Chromium process.
 - Local deployment gate: lint and strict types passed; 68 unit/service tests across 22 files passed; the production build passed; 16 combined Playwright stories passed; and `npm audit --omit=dev` reported 0 vulnerabilities.
 - Local Docker gate: the pinned image built successfully; runtime UID was `1001 (pwuser)` with Node `v24.18.0` and Playwright `1.61.1`; home, health and persisted-runs APIs returned 200; external staging input returned 400 before OpenAI; a direct Chromium launch closed cleanly; and the process list returned to only `tini` plus `next-server`.
 - Mounted-volume restart gate: the same `/app/data` bind mount retained the SQLite/WAL files across a controlled container restart; the run API and health route remained 200; `PRAGMA integrity_check` returned `ok`; and all three expected tables were present.
@@ -100,9 +105,9 @@ The following controlled validation completed on 2026-07-20. It is a record of a
 - Goals 1–3 are functionally complete: browser evidence, human review/export, the controlled ten-case evaluation, and the demo path are implemented. Any future issue remains a new external write requiring a fresh preview and separate explicit confirmation.
 - The disposable `specsentry-export-demo` repository is only the issue-export target. It is not a source-code repository, and no source-code Git remote is configured.
 - The temporary Cloudflare Tunnel is not a deployment or backup mechanism.
-- Model output is probabilistic; the ten deterministic cases are not statistical accuracy evidence. The fixture is intentionally Chromium-only and localhost-only.
-- Local SQLite and filesystem screenshots remain suitable only for controlled workflows. Railway persistence is designed around a single `/app/data` volume and must still be proven through one controlled redeploy.
+- Model output is probabilistic; the ten deterministic cases are not statistical accuracy evidence. The fixture is intentionally Chromium-only and restricted to the single approved host.
+- Railway persistence is intentionally limited to one service and one `/app/data` volume. The controlled redeploy proof covers the demonstrated report and screenshots, not multi-region or disaster-recovery guarantees.
 
 ## Next recommended milestone
 
-Complete the Railway service connection, volume/variable setup, stable-domain redeploy and public production verification. Then replace the URL placeholder and capture the scripted submission video from the verified stable origin.
+Capture the scripted submission video from the verified stable origin and complete the external Build Week submission form. No remaining repository or deployment blocker is known.
