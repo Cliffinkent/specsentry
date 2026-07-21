@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
+const publicDemoMode = process.env.SPECSENTRY_PUBLIC_DEMO === "true";
+
 async function loadDemoAndRun(page: Page, mode: "defective" | "passing") {
   await page.goto("/");
   await page.getByLabel("Demo fixture build").selectOption(mode);
@@ -16,6 +18,7 @@ async function loadDemoAndRun(page: Page, mode: "defective" | "passing") {
 
 test("Build Week demo loading fills the defective journey without manual entry", async ({ page }) => {
   await page.goto("/");
+  await expect(page.getByRole("complementary", { name: "Public demo restriction" })).toHaveCount(publicDemoMode ? 1 : 0);
   await page.getByLabel("Demo fixture build").selectOption("passing");
   await page.getByRole("button", { name: "Load Build Week demo", exact: true }).click();
   await expect(page.getByLabel("Demo fixture build")).toHaveValue("defective");

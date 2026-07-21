@@ -72,6 +72,7 @@ function NewTestForm({
   setBuildMode,
   onSubmit,
   busy,
+  publicDemo,
 }: {
   input: NewTestInput;
   setInput: (value: NewTestInput) => void;
@@ -79,6 +80,7 @@ function NewTestForm({
   setBuildMode: (value: DemoMode) => void;
   onSubmit: () => void;
   busy: boolean;
+  publicDemo: boolean;
 }) {
   const loadDemo = (mode: DemoMode = buildMode) => {
     const origin = window.location.origin;
@@ -129,6 +131,11 @@ function NewTestForm({
           <Field label="Allowed hostname">
             <input required value={input.allowedHostname} onChange={(event) => setInput({ ...input, allowedHostname: event.target.value })} placeholder="127.0.0.1" className="border border-[var(--line)] bg-white px-4 py-3 font-normal" />
           </Field>
+          {publicDemo && (
+            <aside aria-label="Public demo restriction" className="border-l-4 border-[var(--signal)] bg-[rgb(211_255_98/18%)] px-4 py-3 text-sm leading-6">
+              <p>Public demo mode is restricted to Sentry Shop. Deploy your own instance to test an approved staging domain.</p>
+            </aside>
+          )}
           <Field label="User story">
             <textarea required rows={4} value={input.userStory} onChange={(event) => setInput({ ...input, userStory: event.target.value })} className="resize-y border border-[var(--line)] bg-white px-4 py-3 font-normal leading-6" />
           </Field>
@@ -509,7 +516,7 @@ function Report({ report, startNew, refresh }: { report: RunReport; startNew: ()
   );
 }
 
-export function SpecSentryApp() {
+export function SpecSentryApp({ publicDemo = false }: { publicDemo?: boolean }) {
   const [phase, setPhase] = useState<Phase>("input");
   const [input, setInput] = useState<NewTestInput>(emptyInput);
   const [buildMode, setBuildMode] = useState<DemoMode>("defective");
@@ -640,7 +647,7 @@ export function SpecSentryApp() {
       <Header phase={phase} />
       <main className="mx-auto max-w-7xl px-5 py-10 lg:px-8 lg:py-14">
         {error && <div role="alert" className="mb-8 flex items-start justify-between gap-5 border-l-4 border-[#a34c23] bg-[#fff2ec] p-4 text-sm"><span>{error}</span><button type="button" aria-label="Dismiss error" onClick={() => setError(null)} className="font-black">×</button></div>}
-        {phase === "input" && <NewTestForm input={input} setInput={setInput} buildMode={buildMode} setBuildMode={setBuildMode} onSubmit={generate} busy={busy} />}
+        {phase === "input" && <NewTestForm input={input} setInput={setInput} buildMode={buildMode} setBuildMode={setBuildMode} onSubmit={generate} busy={busy} publicDemo={publicDemo} />}
         {phase === "plan" && plan && <PlanEditor plan={plan} setPlan={setPlan} approve={approve} busy={busy} />}
         {phase === "running" && <LiveRun status={runStatus} currentStep={currentStep} actions={actions} latestScreenshot={latestScreenshot} cancel={cancel} />}
         {phase === "report" && report && <Report report={report} startNew={startNew} refresh={() => fetchReport(report.id)} />}

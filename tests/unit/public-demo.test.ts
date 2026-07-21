@@ -29,12 +29,16 @@ describe("public demo policy", () => {
   it("accepts only an exact deployed Sentry Shop fixture URL", () => {
     enablePublicDemo();
     expect(() => assertPublicDemoInput(input)).not.toThrow();
-    expect(() => assertPublicDemoInput({ ...input, stagingUrl: "https://external.example/demo/shop?mode=defective", allowedHostname: "external.example" })).toThrow(PublicDemoRequestError);
     expect(() => assertPublicDemoInput({ ...input, stagingUrl: "https://specsentry-production.example/" })).toThrow(PublicDemoRequestError);
     expect(() => assertPublicDemoInput({ ...input, stagingUrl: `${input.stagingUrl}&next=https://external.example` })).toThrow(PublicDemoRequestError);
     expect(() => assertPublicDemoNavigationUrl("https://specsentry-production.example/")).toThrow(PublicDemoRequestError);
     expect(() => assertPublicDemoNetworkUrl("https://external.example/script.js")).toThrow(PublicDemoRequestError);
     expect(() => assertPublicDemoNetworkUrl("https://specsentry-production.example/_next/static/app.js")).not.toThrow();
+  });
+
+  it("rejects external staging URLs in public demo mode", () => {
+    enablePublicDemo();
+    expect(() => assertPublicDemoInput({ ...input, stagingUrl: "https://external.example/demo/shop?mode=defective", allowedHostname: "external.example" })).toThrow(PublicDemoRequestError);
   });
 
   it("requires an HTTPS root PUBLIC_APP_URL", () => {
