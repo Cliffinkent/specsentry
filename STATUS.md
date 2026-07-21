@@ -1,10 +1,10 @@
 # SpecSentry Status
 
-Last updated: 2026-07-20
+Last updated: 2026-07-21
 
 ## Completed
 
-- Read and visually reviewed the 20-page PRD; extracted it faithfully to `docs/SpecSentry-PRD.md`.
+- Published the final Build Week product requirements at [`docs/PRODUCT_REQUIREMENTS.md`](docs/PRODUCT_REQUIREMENTS.md) after confirming that the Markdown retained every non-empty content block from the visually reviewed 20-page source DOCX; removed the duplicate DOCX.
 - Built the single Next.js TypeScript App Router application with Tailwind CSS, SQLite, SSE and local screenshot storage.
 - Implemented the deterministic Sentry Shop product, basket, guest delivery and order-review journey in explicit passing and defective modes.
 - Implemented strict Zod project, planner, executor-record and evaluator schemas.
@@ -110,4 +110,4 @@ The following controlled validation completed on 2026-07-20. It is a record of a
 
 ## Next recommended milestone
 
-Capture the scripted submission video from the verified stable origin and complete the external Build Week submission form. No remaining repository or deployment blocker is known.
+Complete the external Build Week submission form using the published repository, stable Railway demo, submitted video and supporting media. No remaining repository or deployment blocker is known.

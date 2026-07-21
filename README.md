@@ -4,6 +4,8 @@ SpecSentry turns a written acceptance criterion into an approved browser journey
 
 > Acceptance criteria in. Evidence-backed bugs out.
 
+The canonical Build Week scope and decision history is in the [product requirements document](docs/PRODUCT_REQUIREMENTS.md). This README and [STATUS.md](STATUS.md) describe the final implementation and deliberate limitations.
+
 ## What works
 
 1. Enter a staging URL, exact allowed hostname, user story, acceptance criterion and optional starting instructions, or use **Load demo**.
@@ -265,4 +267,4 @@ Codex built this vertical slice from the PRD: architecture, application code, co
 
 ## Deliberate Goal 3 boundaries
 
-This slice now includes the controlled ten-case fixture evaluation, but still excludes authentication, user-provided tokens, Markdown uploads, Supabase, hosted object storage, mobile/cross-browser testing, generated fixes, CI integration, deployment, and new external integrations. GitHub issue export remains the only external write and stays server-configured, repository-allow-listed, human-previewed, and explicitly confirmed. The evaluation runner never exports. Goal 2's one controlled live export remains readable; the temporary public tunnel used for that proof is not a deployment.
+This slice now includes the controlled ten-case fixture evaluation and Railway deployment, but still excludes authentication, user-provided tokens, Markdown uploads, Supabase, hosted object storage, mobile/cross-browser testing, generated fixes, CI integration, and new external integrations. GitHub issue export remains the only external write and stays server-configured, repository-allow-listed, human-previewed, and explicitly confirmed; it is disabled in public demo mode. The evaluation runner never exports. Goal 2's one controlled live export remains readable; the temporary public tunnel used for that proof is not the Railway deployment.

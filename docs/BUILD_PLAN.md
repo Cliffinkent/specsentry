@@ -8,9 +8,9 @@ Build and verify the first complete SpecSentry vertical slice, add Goal 2 human 
 
 ## Current gate
 
-**Requirements verified:** `SpecSentry Product Requirements.docx` was added, rendered and visually reviewed across all 20 pages, then extracted without changing its wording to `docs/SpecSentry-PRD.md`.
+**Requirements verified:** the original DOCX was rendered and visually reviewed across all 20 pages, then extracted without changing its wording. The checked and submission-updated canonical document is [`docs/PRODUCT_REQUIREMENTS.md`](PRODUCT_REQUIREMENTS.md); the duplicate DOCX has been removed.
 
-Goal 1 is complete, including the real OpenAI matrix. Goal 2 is complete, including persisted human review, exact GitHub preview/export, per-phase token usage and the one controlled live export recorded below. Goal 3 is complete, including the exactly ten-case seeded evaluation, real-model metrics, evidence integrity, and the sub-three-minute demo script. Authentication, user-provided tokens, Markdown upload, Supabase, hosted object storage, CI integration, mobile/cross-browser testing, automatic fixes, deployment and new external integrations remain out of scope.
+Goal 1 is complete, including the real OpenAI matrix. Goal 2 is complete, including persisted human review, exact GitHub preview/export, per-phase token usage and the one controlled live export recorded below. Goal 3 is complete, including the exactly ten-case seeded evaluation, real-model metrics, evidence integrity, the sub-three-minute demo script, and the restricted Railway public deployment. Authentication, user-provided tokens, Markdown upload, Supabase, hosted object storage, CI integration, mobile/cross-browser testing, automatic fixes and new external integrations remain out of scope.
 
 ## Locked decisions from the task brief
 
@@ -24,13 +24,13 @@ Goal 1 is complete, including the real OpenAI matrix. Goal 2 is complete, includ
 - Screenshots in a gitignored local data directory.
 - Automated tests mock OpenAI; separately documented smoke and six-run browser verification commands require a real API key and fail clearly when live configuration is missing.
 - The ten-case evaluation runner uses real OpenAI by default, permits mocks only through an explicit flag, and owns/shuts down its isolated server process.
-- No authentication, uploads, Supabase, mobile testing, generated regression suites, CI integration, automated fixes or deployment. GitHub issue creation is the one allowed external write and requires a human-reviewed preview plus separate explicit confirmation.
+- No authentication, uploads, Supabase, mobile testing, generated regression suites, CI integration or automated fixes. The later submission deployment uses Railway, Docker and a public-demo safety mode restricted to Sentry Shop. GitHub issue creation is the one allowed external write for self-hosted deployments and requires a human-reviewed preview plus separate explicit confirmation; public demo mode disables it.
 
 ## Milestones
 
 ### Milestone 0 - Requirements and runnable foundation
 
-- [x] Read `docs/SpecSentry-PRD.md`, or extract the supplied DOCX there without changing meaning.
+- [x] Read the supplied DOCX, extract it without changing meaning, and publish the submission-updated canonical PRD at `docs/PRODUCT_REQUIREMENTS.md`.
 - [x] Reconcile fixture copy, demo criterion, expected steps, and evidence requirements with this plan.
 - [x] Bootstrap the Next.js TypeScript App Router application with Tailwind CSS.
 - [x] Add `.env.example`, local-data ignores, baseline scripts, and a health/runnable page.
@@ -189,4 +189,4 @@ Passing results have no finding, so finding-level confidence is intentionally ab
 
 ## Completion standard
 
-Goals 1–3 are complete: the evidence-backed browser outcomes are stable, failed findings persist through every human review transition, exact preview and explicit confirmation remain distinct, mocked and controlled live export are idempotent, usage is visible by phase, the fixed ten-case set meets every controlled target, and the Build Week demo requires no manual data entry. The completed live issue does not authorize another export; every future issue remains a separate manual gate. Production deployment still requires a stable public origin and durable hosted persistence.
+Goals 1–3 are complete: the evidence-backed browser outcomes are stable, failed findings persist through every human review transition, exact preview and explicit confirmation remain distinct, mocked and controlled live export are idempotent, usage is visible by phase, the fixed ten-case set meets every controlled target, and the Build Week demo requires no manual data entry. The completed live issue does not authorize another export; every future issue remains a separate manual gate. The Railway public demo is deployed at the stable origin with durable SQLite and screenshot storage on the `/app/data` volume, while GitHub issue creation remains disabled in public demo mode.

@@ -1,12 +1,20 @@
-# SpecSentry Product Requirements Document
+# SpecSentry Product Requirements
 
-Version: 0.1  
-Date: 15 July 2026  
+Version: Build Week submission
+
+Status: Implemented MVP
+
+Last updated: 21 July 2026
+
+This document records the original product scope. The README and STATUS.md describe the final implementation and any deliberate changes.
+
 Target: OpenAI Build Week  
 Track: Developer Tools  
 Working tagline: Acceptance criteria in. Evidence-backed bugs out.
 
 ## 1. Product summary
+
+**Scope status: Implemented**
 
 SpecSentry is an AI QA agent that tests staging websites against written acceptance criteria.
 
@@ -20,9 +28,11 @@ A developer or product manager provides:
 
 SpecSentry turns those requirements into a test plan, runs the journey in an isolated browser, evaluates what happened, and produces a structured QA report with screenshots, reproduction steps, severity, confidence and supporting evidence.
 
-Approved findings can be exported as GitHub issues.
+Failed findings can be reviewed and edited by a human. An approved finding can be previewed as an exact GitHub issue and, outside public demo mode, exported only after a separate explicit confirmation. The hosted public demo deliberately disables issue creation.
 
 ## 2. Problem
+
+**Scope status: Implemented**
 
 Small software teams often have acceptance criteria but lack the time or people to test every release properly.
 
@@ -40,6 +50,8 @@ The result is a gap between what the product was meant to do and what was actual
 
 ## 3. Product vision
 
+**Scope status: Implemented**
+
 SpecSentry acts as the first QA pass before a human reviews a release.
 
 It should answer three questions:
@@ -54,9 +66,11 @@ SpecSentry does not replace human QA. It removes repetitive exploratory work and
 
 ## 4. Build Week fit
 
+**Scope status: Implemented**
+
 SpecSentry fits the Developer Tools track, which includes testing, DevOps, security and agentic workflows. Build Week judges score technological implementation, design, potential impact and quality of the idea. The submission also requires a working project, repository, README, public demo video under three minutes and a Codex /feedback session ID.
 
-The product is designed around a clear three-minute demonstration:
+The submitted product follows a clear sub-three-minute demonstration:
 
 1. Paste an acceptance criterion.
 
@@ -66,9 +80,13 @@ The product is designed around a clear three-minute demonstration:
 
 1. Review the screenshot and reproduction steps.
 
-1. Export the finding to GitHub.
+1. Preview the exact GitHub issue and show that public demo mode blocks creation.
 
 ## 5. Goals
+
+**Scope status: Implemented**
+
+The implemented scope is the controlled Build Week fixture described below.
 
 ### Primary goals
 
@@ -84,41 +102,55 @@ The product is designed around a clear three-minute demonstration:
 
 - Deliver a polished, understandable demonstration.
 
-### Hackathon success targets
+### Hackathon success measures
 
-- Complete a standard five-to-eight-step test journey in under five minutes.
+**Scope status: Implemented**
 
-- Correctly identify at least 80% of seeded acceptance-criteria failures.
+The complete live evaluation achieved the expected classification for every seeded case:
 
-- Keep false-positive findings below 20% on the controlled demo application.
+- 5/5 expected passes
 
-- Attach evidence to every reported defect.
+- 3/3 seeded failures
 
-- Generate a usable issue without manual rewriting.
+- 1/1 blocked case
 
-- Allow a new judge to run the supplied demo without rebuilding the project.
+- 1/1 inconclusive case
 
-These are product targets, rather than claims of measured performance.
+- 0 false failures
+
+- 0 retries
+
+- 0 missing screenshots
+
+- 0 off-domain navigation
+
+See the [controlled evaluation report](EVALUATION_REPORT.md) for the method, run identifiers, evidence integrity checks and case-level results. This was a controlled fixture evaluation and is not a production-grade benchmark or a statistical accuracy claim for arbitrary websites.
 
 ## 6. Non-goals
 
-The hackathon version will not:
+**Scope status: Deliberately limited for Build Week**
 
-- Test arbitrary production websites.
+The submitted Build Week version does not:
+
+- Test arbitrary production or public websites. The hosted demo accepts only Sentry Shop; self-hosted deployments accept only explicitly approved staging domains.
 
 - perform purchases, account deletion or destructive actions.
 
-- Support full cross-browser and mobile-device test matrices.
+- Support mobile browsers or cross-browser test matrices. Execution is Chromium-only.
 
 - Replace existing CI test suites.
 
 - Generate or merge code fixes.
 
-- Support Jira, Linear and multiple issue trackers.
+- Support Jira, Linear or multiple issue trackers.
 
-- Manage enterprise authentication or single sign-on.
+- Manage authentication, enterprise authentication or single sign-on.
 
 - Run unattended against unrestricted domains.
+
+- Allow unrestricted GitHub writes. Public demo mode disables issue creation, and self-hosted export is repository-allow-listed, human-reviewed, previewed and separately confirmed.
+
+- Provide production-scale multi-tenant storage. The submitted deployment uses one SQLite database and screenshot tree on one Railway volume.
 
 - Crawl an entire application looking for unspecified defects.
 
@@ -127,6 +159,8 @@ The hackathon version will not:
 Trying to add these would weaken reliability and leave less time for the core experience.
 
 ## 7. Target users
+
+**Scope status: Implemented**
 
 ### Primary persona: product-led engineering team
 
@@ -164,21 +198,25 @@ The first user should be a product manager, delivery manager or developer who un
 
 ## 8. Core user journey
 
+**Scope status: Implemented**
+
+The public-demo export boundary is a deliberate Build Week limitation.
+
 ### Step 1: Create a project
 
-The user enters:
-
-- Project name
+For the Build Week workflow, the user enters:
 
 - Staging URL
 
 - Allowed domain
 
-- Optional test-account details
+- User story
 
-- GitHub repository details
+- Acceptance criterion
 
-The staging URL must match the allowed domain.
+- Optional starting instructions
+
+The staging URL hostname must exactly match the allowed hostname. In the hosted demo, the URL must also be the Sentry Shop fixture on the deployed public origin. User-managed project records, test credentials and repository selection are deferred; GitHub configuration remains server-only.
 
 ### Step 2: Supply the specification
 
@@ -186,9 +224,11 @@ The user pastes:
 
 - A user story
 
-- One or more acceptance criteria
+- One acceptance criterion
 
 - Optional starting instructions
+
+Multi-criterion specification management is deferred; the submitted workflow executes one approved criterion per run.
 
 Example:
 
@@ -286,39 +326,43 @@ For each failed criterion, SpecSentry creates a draft finding containing:
 
 ### Step 7: Export
 
-The user reviews the finding and chooses whether to create a GitHub issue.
+The user reviews and edits the finding, then explicitly approves or rejects it. Approval itself never creates an issue.
 
-No issue is created without human approval.
+For an approved failed finding, the server renders the exact GitHub issue title, Markdown body and evidence links. A separate checkbox and action are required before issue creation. The public demo stops after preview because issue creation is disabled at the service boundary.
+
+No issue is created without both human approval and the separate explicit confirmation.
 
 ## 9. Functional requirements
 
+**Scope status: Deliberately limited for Build Week**
+
+Individual functional requirements record which parts were implemented or deferred.
+
 ### FR1: Project configuration
 
-The system must allow the user to create and edit a project.
+**Scope status: Deliberately limited for Build Week**
+
+The submitted workflow captures the minimum project constraints needed for one approved run.
 
 Required fields:
-
-- Project name
 
 - Base staging URL
 
 - Allowed domain
 
+- User story
+
+- Acceptance criterion
+
 Optional fields:
 
-- Test username
+- Starting instructions
 
-- Test password
-
-- GitHub owner
-
-- GitHub repository
-
-- GitHub access token
-
-Credentials must be stored encrypted or supplied through environment variables for the demo.
+**Deferred:** User-managed project records, test accounts and user-supplied GitHub credentials. OpenAI and GitHub configuration is supplied only through server-side environment variables. The public demo exposes no credential input and cannot create GitHub issues.
 
 ### FR2: Specification input
+
+**Scope status: Deliberately limited for Build Week**
 
 The system must accept:
 
@@ -328,13 +372,17 @@ The system must accept:
 
 - Gherkin-style criteria
 
-The MVP will support pasted text and Markdown file upload.
+The MVP supports pasted text, including Markdown and Gherkin-style criteria.
 
-PDF, DOCX, Jira and product-management integrations are stretch work.
+**Deferred:** File upload.
+
+PDF, DOCX, Jira and product-management integrations remain stretch work.
 
 ### FR3: Test-plan generation
 
-GPT-5.6 must turn the supplied specification into a structured test-plan schema.
+**Scope status: Implemented**
+
+GPT-5.6 Terra uses the OpenAI Responses API to turn the supplied specification into a structured test-plan schema. Planner output is validated with Zod and receives one controlled retry when structured output is invalid.
 
 Each test step must include:
 
@@ -356,6 +404,8 @@ The generated plan must be shown to the user before execution.
 
 ### FR4: Browser execution
 
+**Scope status: Implemented**
+
 The test runner must:
 
 - Launch an isolated Chromium browser.
@@ -374,9 +424,11 @@ The test runner must:
 
 - Allow the user to stop the run manually.
 
-OpenAI’s computer-use guidance supports persistent Playwright browser sessions and screenshot-based action loops.
+The executor uses OpenAI computer use for the screenshot/action loop and executes normalized actions only inside an isolated Playwright Chromium context.
 
 ### FR5: Evaluation
+
+**Scope status: Implemented**
 
 The evaluation phase must be separate from the execution phase.
 
@@ -399,6 +451,8 @@ The evaluator must return a structured result rather than free-form prose.
 This separation reduces the chance that the same model call invents evidence to support its earlier decisions.
 
 ### FR6: Structured findings
+
+**Scope status: Implemented**
 
 Findings must follow a strict JSON schema.
 
@@ -430,9 +484,11 @@ Suggested schema:
 }
 ```
 
-Structured Outputs can constrain model responses to an application-defined JSON schema.
+The evaluator's Structured Output is validated with Zod. Evidence references are accepted only when they map to non-empty screenshots recorded by the same run.
 
 ### FR7: Run report
+
+**Scope status: Implemented**
 
 The completed report must show:
 
@@ -458,11 +514,11 @@ The report must make model observations and captured evidence visibly distinct.
 
 ### FR8: GitHub issue export
 
+**Scope status: Deliberately limited for Build Week**
+
 The user must be able to:
 
 - Edit the draft finding.
-
-- Select the repository.
 
 - Preview the issue.
 
@@ -470,21 +526,25 @@ The user must be able to:
 
 - View the resulting issue URL.
 
-Issue creation must require explicit confirmation.
+Repository configuration is server-only and allow-listed. Human approval and issue preview are distinct from issue creation. Creation requires a fresh preview plus separate explicit confirmation, and remains idempotent after success. Public demo mode permits the exact preview but blocks issue creation in both the route and service layers.
 
 ### FR9: Run history
+
+**Scope status: Implemented**
 
 The application must retain recent demo runs.
 
 Users must be able to reopen a run and inspect its report without rerunning the test.
 
-For the hackathon version, local persistence or a small hosted database is enough.
+SQLite persists runs, review state and normalized events. Local development writes below the configured data directory; Railway uses durable storage through its mounted volume at `/app/data`, including the SQLite/WAL files and screenshot tree.
 
 ### FR10: Controlled demo mode
 
+**Scope status: Implemented**
+
 The repository must include a small staging application with at least one seeded defect.
 
-The application should offer two modes:
+The core demonstration offers two modes:
 
 - Passing build
 
@@ -492,11 +552,17 @@ The application should offer two modes:
 
 This gives judges a repeatable way to see both outcomes and protects the demonstration against changes to third-party websites.
 
+The controlled ten-case evaluation adds deterministic fixture modes for missing required-field validation, lost basket state and an unavailable dependency. Hosted plan and run APIs reject external staging URLs and accept only the exact Sentry Shop fixture paths on the public origin.
+
 ## 10. AI workflow
+
+**Scope status: Implemented**
 
 SpecSentry should use three phases rather than a collection of loosely defined agents.
 
 ### Phase A: Planner
+
+**Scope status: Implemented**
 
 Input:
 
@@ -513,6 +579,8 @@ Output:
 The planner cannot operate the browser.
 
 ### Phase B: Executor
+
+**Scope status: Implemented**
 
 Input:
 
@@ -534,6 +602,8 @@ The executor cannot declare a criterion passed or failed.
 
 ### Phase C: Evaluator
 
+**Scope status: Implemented**
+
 Input:
 
 - Criterion
@@ -554,7 +624,9 @@ The evaluator cannot operate the browser or create issues.
 
 This split keeps responsibilities clear and makes failures easier to diagnose.
 
-## 11. Proposed technical architecture
+## 11. Technical architecture
+
+**Scope status: Implemented**
 
 ### Front end
 
@@ -564,19 +636,19 @@ This split keeps responsibilities clear and makes failures easier to diagnose.
 
 - React
 
-- Tailwind CSS or a small component library
+- Tailwind CSS
 
-- Server-sent events or WebSockets for live run updates
+- Server-sent events for live run updates
 
 ### Application backend
 
-- Next.js server routes or a small Node.js service
+- Next.js App Router server routes in the same Node.js application
 
 - OpenAI SDK
 
 - GitHub API client
 
-- Background run worker
+- In-process bounded run orchestrator
 
 - Zod schemas for validation
 
@@ -598,7 +670,7 @@ This split keeps responsibilities clear and makes failures easier to diagnose.
 
 ### AI services
 
-- GPT-5.6 through the Responses API
+- GPT-5.6 Terra through the OpenAI Responses API
 
 - Computer-use tool for browser interaction
 
@@ -610,31 +682,48 @@ The Responses API supports stateful model interactions, computer use and externa
 
 ### Persistence
 
-Hackathon recommendation:
+Implemented Build Week choice:
 
-- SQLite for local development
+- SQLite behind `lib/repository.ts` for both local and hosted persistence
 
-- Supabase Postgres for the hosted demo
+- Screenshot files below the configured data directory
 
-- Object storage for screenshots
+- A Railway volume mounted at `/app/data` for durable SQLite/WAL files and screenshots
+
+- No Supabase, hosted object storage or production-scale multi-tenant storage
+
+### Deployment
+
+- One Docker-based Railway service built from `main`
+
+- Multi-stage Node 24 build
+
+- Playwright `1.61.1` dependency matched by the official `mcr.microsoft.com/playwright:v1.61.1-noble` runtime image
+
+- Standalone Next.js server launched through `tini`
+
+- Health checks and bounded restart/drain configuration in `railway.json`
 
 ### System flow
 
-```json
+```text
 User
-  ↓
+  |
 Next.js dashboard
-  ↓
+  |
 Run orchestrator
-  ├── Planner response
-  ├── Playwright browser
-  ├── Computer-use action loop
-  ├── Screenshot and evidence store
-  ├── Evaluator response
-  └── GitHub issue function
+  |-- Planner: Responses API structured plan
+  |-- Executor: OpenAI computer use in Playwright Chromium
+  |-- Evidence: normalized actions, observations and screenshots
+  |-- Evaluator: separate Responses API evidence judgement
+  `-- Human review: exact GitHub preview, then separate confirmation
 ```
 
 ## 12. Core data entities
+
+**Scope status: Deliberately limited for Build Week**
+
+The logical entities below remain the product model. The submitted MVP persists the approved project constraints, specification, plan, results and review state within SQLite run records rather than exposing a full normalized multi-project workspace.
 
 ### Project
 
@@ -740,11 +829,17 @@ Run orchestrator
 
 ## 13. Safety and security requirements
 
+**Scope status: Implemented**
+
 Computer use must run inside an isolated browser or container.
 
 The application must:
 
-- Maintain a domain allow list.
+- Require the staging URL hostname to exactly equal the approved hostname.
+
+- Limit self-hosted deployments to explicitly approved staging domains.
+
+- In public demo mode, accept only the exact Sentry Shop fixture on the configured public origin and reject external staging URLs before any model or browser work.
 
 - Block local file access.
 
@@ -753,6 +848,8 @@ The application must:
 - Block downloads unless explicitly enabled.
 
 - Prevent navigation to third-party authentication providers.
+
+- Abort browser requests and navigation outside the approved hostname; reject pop-ups, downloads and service workers.
 
 - Set maximum action and runtime limits.
 
@@ -764,17 +861,25 @@ The application must:
 
 - Redact passwords and tokens from logs.
 
+- Keep cookies, authorization headers, raw model traces and environment values out of persisted diagnostics and client responses.
+
+- Keep GitHub configuration server-only, enforce a repository allow list, and disable issue creation completely in public demo mode.
+
+- Require a failed finding, human approval, a fresh exact preview and a separate explicit confirmation before any self-hosted GitHub write.
+
 These controls follow OpenAI’s guidance to isolate computer-use sessions, restrict domains and actions, and keep people involved in high-impact actions.
 
 ## 14. User interface
+
+**Scope status: Deliberately limited for Build Week**
+
+The four conceptual screens are delivered as one responsive workflow rather than four separate routes.
 
 The MVP requires four main screens.
 
 ### Dashboard
 
 Displays:
-
-- Projects
 
 - Recent runs
 
@@ -842,6 +947,8 @@ The interface should present the test run as a product workflow, rather than exp
 
 ## 15. Severity rules
 
+**Scope status: Implemented**
+
 ### Critical
 
 - Security or data-loss risk
@@ -878,6 +985,8 @@ The evaluator may propose a severity, but the report must label it as an AI asse
 
 ## 16. Performance and reliability requirements
 
+**Scope status: Implemented**
+
 - A test run must time out after five minutes by default.
 
 - A run must stop after 40 browser actions.
@@ -897,6 +1006,8 @@ The evaluator may propose a severity, but the report must label it as an AI asse
 - A failed GitHub export must not remove the local finding.
 
 ## 17. Demo application
+
+**Scope status: Implemented**
 
 Build a small fictional e-commerce staging site called Sentry Shop.
 
@@ -934,9 +1045,13 @@ The passing and defective versions must be switchable through a demo configurati
 
 ## 18. MVP acceptance criteria
 
+**Scope status: Implemented**
+
+The acceptance criteria are met subject to the deliberate public-demo export boundary.
+
 The MVP is complete when:
 
-1. A user can create a project with an allowed staging domain.
+1. A user can define a staging URL with an exact allowed hostname.
 
 1. A user can paste a story and acceptance criterion.
 
@@ -958,13 +1073,15 @@ The MVP is complete when:
 
 1. The user can edit and approve the finding.
 
-1. The approved finding can be exported to GitHub.
+1. The approved finding can render an exact GitHub issue preview; self-hosted creation requires separate explicit confirmation, while public demo mode blocks creation.
 
 1. A judge can run the supplied demo using the README instructions.
 
 1. The complete workflow can be demonstrated in under three minutes.
 
 ## 19. Stretch goals
+
+**Scope status: Stretch goal**
 
 Stretch work should begin only after the complete MVP workflow is stable.
 
@@ -986,7 +1103,13 @@ Priority order:
 
 Automatic code fixing is deliberately last. It adds risk and distracts from the stronger QA story.
 
+None of these stretch goals are implied by the hosted demo. Mobile browsers, cross-browser testing, CI integration, automatic code fixes and new external trackers remain outside the submitted MVP.
+
 ## 20. Delivery plan
+
+**Scope status: Implemented**
+
+This section preserves the original Build Week sequencing. The final implementation and deployment state is recorded in the README and `STATUS.md`.
 
 ### Day 1: Foundation
 
@@ -1056,7 +1179,9 @@ Automatic code fixing is deliberately last. It adds risk and distracts from the 
 
 ## 21. Evaluation set
 
-Create at least ten acceptance criteria against the demo application:
+**Scope status: Implemented**
+
+The submitted evaluation uses exactly ten acceptance criteria against Sentry Shop:
 
 - Five passing criteria
 
@@ -1080,9 +1205,13 @@ Record:
 
 - Whether a human reviewer agrees
 
-This small evaluation set will provide credible evidence for the submission without claiming production-grade accuracy.
+The complete live run achieved 5/5 expected passes, 3/3 seeded failures, 1/1 blocked case and 1/1 inconclusive case, with 0 false failures, 0 retries, 0 missing screenshots and 0 off-domain navigation. See the [controlled evaluation report](EVALUATION_REPORT.md).
+
+This was a controlled fixture evaluation and is not a production-grade benchmark. It does not establish performance on arbitrary websites, browsers, devices, authentication flows, production traffic or adversarial content.
 
 ## 22. Demo script
+
+**Scope status: Implemented**
 
 ### 0:00–0:20
 
@@ -1108,7 +1237,7 @@ Show the failed criterion, screenshot and reproduction steps.
 
 ### 2:10–2:30
 
-Approve and export the finding to GitHub.
+Approve the finding, preview the exact GitHub issue and show that public demo mode disables creation.
 
 ### 2:30–2:50
 
@@ -1121,6 +1250,10 @@ Close with:
 > SpecSentry gives small teams a first QA pass before release, using the requirements they already write.
 
 ## 23. Main risks
+
+**Scope status: Implemented**
+
+The mitigations are implemented; residual limits are documented below and in `STATUS.md`.
 
 ### Browser-agent reliability
 
@@ -1188,6 +1321,8 @@ Response:
 
 ## 24. Product decisions locked for the hackathon
 
+**Scope status: Implemented**
+
 - Developer Tools is the submission track.
 
 - The product is a web application.
@@ -1196,9 +1331,11 @@ Response:
 
 - GitHub is the only issue-tracker integration.
 
-- Testing is limited to approved staging domains.
+- Testing is limited to explicitly approved staging domains; the hosted public demo is further restricted to Sentry Shop and rejects external staging URLs.
 
 - Findings require human approval.
+
+- GitHub issue creation requires a separate explicit confirmation and is disabled in public demo mode.
 
 - The demo uses a controlled fixture application.
 
@@ -1210,6 +1347,10 @@ Response:
 
 ## 25. Definition of done
 
+**Scope status: Implemented**
+
+This status covers the repository and hosted Build Week demo; external submission administration is not product behaviour.
+
 SpecSentry is ready to submit when:
 
 - The hosted demo works using supplied test data.
@@ -1220,7 +1361,7 @@ SpecSentry is ready to submit when:
 
 - Every finding contains evidence.
 
-- GitHub export works.
+- Exact GitHub preview works in the hosted demo; issue creation is deliberately disabled there. Self-hosted export remains human-approved, separately confirmed and repository-allow-listed.
 
 - Security limits are active.
 
@@ -1230,6 +1371,6 @@ SpecSentry is ready to submit when:
 
 - The README explains the roles of Codex and GPT-5.6.
 
-- The demonstration video is public and under three minutes.
+- The submitted demonstration video is under three minutes.
 
-- The Devpost entry contains the repository and Codex session ID.
+- External submission fields can reference the repository, hosted demo, video and Codex session ID without changing product behaviour.
